@@ -1,15 +1,23 @@
+import tkinter
+import tkinter.messagebox
+import customtkinter
 from Phidget22.Phidget import *
 from Phidget22.Devices.VoltageInput import *
-import time # A dev 
+import time # bibliothèque temps 
+import matplotlib.pyplot as plt
+import numpy as np
 """
 Ce code est écrit en Python et utilise la bibliothèque "Phidget22" pour interfacer avec un dispositif d'entrée de tension Phidget. 
 Le code définit deux fonctions: Recup_voltage et main.
 
 """
-L=[]
+
+Tension_Phidget= []
+
 def Recup_voltage(self, voltage):  # Méthode qui stocke la tension du Phidget dans la liste L	
-	L.append(voltage)
-	print(L)
+	
+	Tension_Phidget.append(voltage)
+	print(Tension_Phidget)
 
 """
 La fonction Recup_voltage prend deux arguments: self et tension. 
@@ -17,17 +25,18 @@ La fonction Recup_voltage prend deux arguments: self et tension.
 Il ajoute la valeur de tension à une liste L et imprime le contenu actuel de L.
 """
 def main(n): # Méthode principal qui fait fonctionner le phidget
-	
+	k= 0 
 	voltageInput0 = VoltageInput() # VoltageInput est une classe qui 
 	
 	voltageInput0.setHubPort(0) 
 		
 	voltageInput0.setDeviceSerialNumber(626587)
 
-	for k in range (0,n):		
+	while k < n: 	
 
 		voltageInput0.setOnVoltageChangeHandler(Recup_voltage)
-
+		time.sleep(1)
+		k+=1
 		voltageInput0.openWaitForAttachment(5000) # Méthode: OpenWaitForAttachment (n): ouvre une 
 													#connexion au dispositif d'entrée de tension Phidget et 
 													# attend n millisecond qu'il soit attaché
@@ -54,9 +63,16 @@ La fonction main prend un argument n et effectue les étapes suivantes:
 	3. Appelle la méthode close sur voltageInput0, qui ferme la connexion au dispositif d'entrée de tension Phidget.
 
 """
-	
+def graph():
+	x = np.linspace(400, 800, 9) # 100=nombre d'échantillon
+	y =  Tension_Phidget
+	plt.plot(x, y)
+	plt.xlabel("Longueur d'onde (nm) ")
+	plt.ylabel('Tension du Phidget')
+	plt.title("Tension du phidghet en fonction de la longueur d'onde")
+	plt.show()
 
-main(4)
-
+main(9) # Test pour n=9
+graph()
 
 
