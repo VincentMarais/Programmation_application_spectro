@@ -63,16 +63,16 @@ La fonction main prend un argument n et effectue les étapes suivantes:
 	3. Appelle la méthode close sur voltageInput0, qui ferme la connexion au dispositif d'entrée de tension Phidget.
 
 """
-def graph():
-	x = np.linspace(400, 800, 9) # 100=nombre d'échantillon
+def graph(n):
+	x = np.linspace(400, 800, n) # 100=nombre d'échantillon
 	y =  Tension_Phidget
 	plt.plot(x, y)
 	plt.xlabel("Longueur d'onde (nm) ")
 	plt.ylabel('Tension du Phidget')
 	plt.title("Tension du phidghet en fonction de la longueur d'onde")
 	plt.show()
-
-main(9) # Test pour n=9
-graph()
+n=9
+main(n) # Test pour n=9
+graph(n)
 
 
