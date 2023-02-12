@@ -1,6 +1,6 @@
 from Phidget22.Phidget import *
 from Phidget22.Devices.VoltageInput import *
-import time # Test Git
+import time # Test Git rege
 
 L=[]
 def onVoltageChange(self, voltage):  # Le channel de 	
@@ -10,7 +10,7 @@ def onVoltageChange(self, voltage):  # Le channel de
 def main(n):
 	
 	voltageInput0 = VoltageInput()
-	for k in range (0,n):		
+	for k in range (0,n+1):		
 
 		voltageInput0.setHubPort(0)
 		voltageInput0.setDeviceSerialNumber(626587)
