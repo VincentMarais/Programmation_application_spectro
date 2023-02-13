@@ -10,21 +10,67 @@ import numpy as np
 Ce code est écrit en Python et utilise la bibliothèque "Phidget22" pour interfacer avec un dispositif d'entrée de tension Phidget. 
 Le code définit deux fonctions: Recup_voltage et main.
 
+Problèmes
 """
+# Variables
+Tension_Phidget=[]
+def creation_Liste():
+	L= []
+	return L
 
-Tension_Phidget= []
 
+# Class Phidget
 def Recup_voltage(self, voltage):  # Méthode qui stocke la tension du Phidget dans la liste L	
-	
 	Tension_Phidget.append(voltage)
-	print(Tension_Phidget)
-
+	#print(Tension_Phidget)
+	
 """
 La fonction Recup_voltage prend deux arguments: self et tension. 
 
 Il ajoute la valeur de tension à une liste L et imprime le contenu actuel de L.
 """
-def main(n): # Méthode principal qui fait fonctionner le phidget
+
+
+def main_1(n):  # 
+    
+	voltageInput0 = VoltageInput()
+
+    
+	voltageInput0.setHubPort(0) 
+		
+	voltageInput0.setDeviceSerialNumber(626587)
+	
+	start_time = time.time() # Temps initial machine depuis 1er Janvier 1970 en second 
+	while (time.time() - start_time) < n+1: # Tant la durée de simulation n'a pas duré 10s on applique la boucle
+		print(time.time() - start_time)
+		voltageInput0.setOnVoltageChangeHandler(Recup_voltage)
+		voltageInput0.openWaitForAttachment(5000)
+		print(Tension_Phidget)
+		print(len(Tension_Phidget))  
+		voltageInput0.close() 
+	
+
+def main_2(n): # 
+	k= 0 
+	voltageInput0 = VoltageInput() # VoltageInput est une classe qui la tension d'entrée du Phidget 
+	
+	voltageInput0.setHubPort(0) 
+		
+	voltageInput0.setDeviceSerialNumber(626587)
+
+	voltageInput0.setOnVoltageChangeHandler(Recup_voltage)
+
+	voltageInput0.openWaitForAttachment(5000) # Méthode: OpenWaitForAttachment (n): ouvre une 
+													#connexion au dispositif d'entrée de tension Phidget et 
+													# attend n millisecond qu'il soit attaché
+	while k < n: 	
+		print(len(Tension_Phidget))
+		time.sleep(0.25) # Intervalle de temps entre 2 valeurs du Phidget  (cf docs Phidget: https://www.phidgets.com/?view=api&product_id=VCP1000_0&lang=Python)
+		k+=1
+	voltageInput0.close() # On appelle la méthode close qui ferme le programme	
+
+
+def main_3(n): # Méthode principal qui fait fonctionner le phidget
 	k= 0 
 	voltageInput0 = VoltageInput() # VoltageInput est une classe qui 
 	
@@ -42,8 +88,23 @@ def main(n): # Méthode principal qui fait fonctionner le phidget
 													# attend n millisecond qu'il soit attaché
 
 		voltageInput0.close() # On appelle la méthode close qui ferme le programme		
+
+def main_4():
+	ch = VoltageInput()
+
+	ch.setHubPort(0) 
+		
+	ch.setDeviceSerialNumber(626587)
+	ch.openWaitForAttachment(1000)
+
+	dataInterval = ch.getDataInterval()
+	print("DataInterval: " + str(dataInterval))
 	
-	
+	ch.close()
+main_1(10)
+
+
+
 """
 La fonction main prend un argument n et effectue les étapes suivantes:
 
@@ -64,15 +125,15 @@ La fonction main prend un argument n et effectue les étapes suivantes:
 
 """
 def graph(n):
-	x = np.linspace(400, 800, n) # 100=nombre d'échantillon
-	y =  Tension_Phidget
+	x = np.linspace(0, n, n) # 100=nombre d'échantillon
+	y =  np.sin(x)
 	plt.plot(x, y)
 	plt.xlabel("Longueur d'onde (nm) ")
 	plt.ylabel('Tension du Phidget')
 	plt.title("Tension du phidghet en fonction de la longueur d'onde")
 	plt.show()
-n=9
-main(n) # Test pour n=9
-graph(n)
+
+
+
 
 
