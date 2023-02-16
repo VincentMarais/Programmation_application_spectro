@@ -10,47 +10,41 @@ import numpy as np
 from PIL import Image
 import os
 
-"""
-Problème actuel, la fonction zéro ne fonctionne pas 
-"""
+
 
 # Variables
 
-Tension_Phidget= []
+
+# Tension_Phidget_echantillon= []
 
 
 
-# Class Phidget
-
-def Recup_voltage(self, voltage): # Méthode qui stocke la tension du Phidget dans la liste L	
-	
-    Tension_Phidget.append(voltage)
-    
-
+# Classe Phidget
 
 """
 # La fonction Recup_voltage prend deux arguments: self et tension. 
 
 #Il ajoute la valeur de tension à une liste L et imprime le contenu actuel de L.
 """
-def main_1(n):  # 
-    
-	voltageInput0 = VoltageInput()
+def main_1(n):  
+    Tension_Phidget_echantillon= []
 
+    voltageInput0 = VoltageInput()
     
-	voltageInput0.setHubPort(0) 
-		
-	voltageInput0.setDeviceSerialNumber(626587)
+    voltageInput0.setHubPort(0) 
 	
-	start_time = time.time() # Temps initial machine depuis 1er Janvier 1970 en second 
-	while (time.time() - start_time) < n+1: # Tant la durée de simulation n'a pas duré 10s on applique la boucle
-		print(time.time() - start_time)
-		voltageInput0.setOnVoltageChangeHandler(Recup_voltage)
-		voltageInput0.openWaitForAttachment(5000)
-		print(Tension_Phidget)
-		print(len(Tension_Phidget))  
-		voltageInput0.close() 
-
+    voltageInput0.setDeviceSerialNumber(626587)
+	
+    start_time = time.time() # Temps initial machine depuis 1er Janvier 1970 en second 
+    while (time.time() - start_time) < n+1: # Tant la durée de simulation n'a pas duré 10s on applique la boucle
+        print(time.time() - start_time)
+        voltageInput0.openWaitForAttachment(5000)
+        Tension_Phidget_echantillon.append(voltageInput0.getVoltage())
+        voltageInput0.openWaitForAttachment(5000)
+        print(Tension_Phidget_echantillon)
+        print(len(Tension_Phidget_echantillon))  
+        voltageInput0.close() 
+    return Tension_Phidget_echantillon
 """
 La fonction main prend un argument n et effectue les étapes suivantes:
 
@@ -108,7 +102,7 @@ class App(customtkinter.CTk):
         self.navigation_frame.grid(row=0, column=0, sticky="nsew")
         self.navigation_frame.grid_rowconfigure(4, weight=1)
 
-        self.navigation_frame_label = customtkinter.CTkLabel(self.navigation_frame, text="  Spectro", image=self.logo_image,
+        self.navigation_frame_label = customtkinter.CTkLabel(self.navigation_frame, text="  VARIAN 634", image=self.logo_image,
                                                              compound="left", font=customtkinter.CTkFont(size=15, weight="bold"))
         self.navigation_frame_label.grid(row=0, column=0, padx=20, pady=20)
 
@@ -145,15 +139,11 @@ class App(customtkinter.CTk):
         self.second_frame = customtkinter.CTkFrame(self, corner_radius=0, fg_color="transparent")
 
             # Bouton Page Balayage
-        self.second_frame_button_1= customtkinter.CTkButton(self.second_frame, text="Acquisition balayage" , command=self.Acquisition)
+        self.second_frame_button_1= customtkinter.CTkButton(self.second_frame, text="Acquisition balayage" , command=self.Acquisition_graph_balayage)
         self.second_frame_button_1.grid(row=1, column=0, padx=20, pady=10)
 
-        self.second_frame_button_2= customtkinter.CTkButton(self.second_frame, text="Graphique balayage" , command=self.graph_balayage)
+        self.second_frame_button_2= customtkinter.CTkButton(self.second_frame, text="Graphique balayage" , command=self.Acquisition_graph_balayage)
         self.second_frame_button_2.grid(row=2, column=0, padx=20, pady=10)
-
-        self.second_frame_button_3= customtkinter.CTkButton(self.second_frame, text="Zéro balayage" , command=self.Zero)
-        self.second_frame_button_3.grid(row=3, column=0, padx=20, pady=10)
-
      
 
         # create third frame
@@ -163,11 +153,9 @@ class App(customtkinter.CTk):
         self.third_frame_button_1= customtkinter.CTkButton(self.third_frame, text="Acquisition continu" , command=self.Acquisition)
         self.third_frame_button_1.grid(row=1, column=0, padx=20, pady=10)
 
-        self.third_frame_button_2= customtkinter.CTkButton(self.third_frame, text="Graphique continu" , command=self.graph_continu)
+        self.third_frame_button_2= customtkinter.CTkButton(self.third_frame, text="Graphique continu" , command=self.Acquisition_graph_continu)
         self.third_frame_button_2.grid(row=2, column=0, padx=20, pady=10)
 
-        self.third_frame_button_3= customtkinter.CTkButton(self.third_frame, text="Zéro continu" , command=self.Zero)
-        self.third_frame_button_3.grid(row=3, column=0, padx=20, pady=10)
 
 
         # select default frame
@@ -212,18 +200,18 @@ class App(customtkinter.CTk):
 
    # Méthode pour l'analyse des données 
 
-    def graph_balayage(self): # Tracer un graphique pour le continu
+    def Acquisition_graph_balayage(self): # Tracer un graphique pour le continu
         x = np.linspace(400, 800, 10) # n=nombre d'échantillon (longueur d'onde)
-        y =  Tension_Phidget
+        y =  main_1(n=10)
         plt.plot(x, y)
         plt.xlabel("Longueur d'onde (nm)")
         plt.ylabel('Tension du Phidget (Volt)')
         plt.title("Mode Balayage")
         plt.show()
     
-    def graph_continu(self): # Tracer un graphique pour le continu
+    def Acquisition_graph_continu(self): # Tracer un graphique pour le continu
         x = np.linspace(0, 10, 10) # n=nombre d'échantillon (temps)
-        y =  Tension_Phidget
+        y = main_1(n=10) #  Absorbance: np.log10(Tension_Phidget_echantillon/Tension_Phidget_blanc)
         plt.plot(x, y)
         plt.xlabel("Temps (s)")
         plt.ylabel('Tension du Phidget (Volt)')
@@ -232,6 +220,7 @@ class App(customtkinter.CTk):
    
     def Zero(self): # Réinitialiser la liste Tension_Phidget 
         Tension_Phidget=[]
+
 
 
 
