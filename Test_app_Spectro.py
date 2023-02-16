@@ -26,8 +26,10 @@ import os
 
 #Il ajoute la valeur de tension à une liste L et imprime le contenu actuel de L.
 """
-def main_1(n):  
+def Recup_tension_Phidget(n):  
     Tension_Phidget_echantillon= []
+
+    Temps=[]
 
     voltageInput0 = VoltageInput()
     
@@ -38,13 +40,13 @@ def main_1(n):
     start_time = time.time() # Temps initial machine depuis 1er Janvier 1970 en second 
     while (time.time() - start_time) < n+1: # Tant la durée de simulation n'a pas duré 10s on applique la boucle
         print(time.time() - start_time)
-        voltageInput0.openWaitForAttachment(5000)
-        Tension_Phidget_echantillon.append(voltageInput0.getVoltage())
-        voltageInput0.openWaitForAttachment(5000)
+        Temps.append(time.time() - start_time)
+        voltageInput0.openWaitForAttachment(1000)
+        Tension_Phidget_echantillon.append(voltageInput0.getVoltage()) # getVoltage() : (Tension la plus récente du channel Phidget) https://www.phidgets.com/?view=api&product_id=VCP1000_0&lang=Python
         print(Tension_Phidget_echantillon)
         print(len(Tension_Phidget_echantillon))  
         voltageInput0.close() 
-    return Tension_Phidget_echantillon
+    return Temps, Tension_Phidget_echantillon
 """
 La fonction main prend un argument n et effectue les étapes suivantes:
 
@@ -139,7 +141,7 @@ class App(customtkinter.CTk):
         self.second_frame = customtkinter.CTkFrame(self, corner_radius=0, fg_color="transparent")
 
             # Bouton Page Balayage
-        self.second_frame_button_1= customtkinter.CTkButton(self.second_frame, text="Acquisition balayage" , command=self.Acquisition_graph_balayage)
+        self.second_frame_button_1= customtkinter.CTkButton(self.second_frame, text="Acquisition balayage" , command=self.Acquisition)
         self.second_frame_button_1.grid(row=1, column=0, padx=20, pady=10)
 
         self.second_frame_button_2= customtkinter.CTkButton(self.second_frame, text="Graphique balayage" , command=self.Acquisition_graph_balayage)
@@ -200,9 +202,9 @@ class App(customtkinter.CTk):
 
    # Méthode pour l'analyse des données 
 
-    def Acquisition_graph_balayage(self): # Tracer un graphique pour le continu
-        x = np.linspace(400, 800, 10) # n=nombre d'échantillon (longueur d'onde)
-        y =  main_1(n=10)
+    def Acquisition_graph_balayage(self): # Tracer un graphique pour le balayage x=longueur d'onde / y= Tension
+        x = np.linspace(400,800,10)# 10=nombre d'échantillon 
+        y =  Recup_tension_Phidget(n=10) [1]
         plt.plot(x, y)
         plt.xlabel("Longueur d'onde (nm)")
         plt.ylabel('Tension du Phidget (Volt)')
@@ -210,8 +212,7 @@ class App(customtkinter.CTk):
         plt.show()
     
     def Acquisition_graph_continu(self): # Tracer un graphique pour le continu
-        x = np.linspace(0, 10, 10) # n=nombre d'échantillon (temps)
-        y = main_1(n=10) #  Absorbance: np.log10(Tension_Phidget_echantillon/Tension_Phidget_blanc)
+        [x,y]= Recup_tension_Phidget(n=10)         
         plt.plot(x, y)
         plt.xlabel("Temps (s)")
         plt.ylabel('Tension du Phidget (Volt)')
@@ -227,7 +228,7 @@ class App(customtkinter.CTk):
 
     def Acquisition(self):        
         L=[]
-        main_1(n=10)
+        Recup_tension_Phidget(n=10)
 
 
 

@@ -31,23 +31,27 @@ Il ajoute la valeur de tension à une liste L et imprime le contenu actuel de L.
 """
 
 
-def main_1(n):  # 
-    
-	voltageInput0 = VoltageInput()
+def main_1(n):  # Fonction choisi pour l'app 
+	Tension_Phidget_echantillon= []
 
+	Temps=[]
+
+	voltageInput0 = VoltageInput()
     
 	voltageInput0.setHubPort(0) 
-		
+	
 	voltageInput0.setDeviceSerialNumber(626587)
 	
 	start_time = time.time() # Temps initial machine depuis 1er Janvier 1970 en second 
 	while (time.time() - start_time) < n+1: # Tant la durée de simulation n'a pas duré 10s on applique la boucle
 		print(time.time() - start_time)
-		voltageInput0.setOnVoltageChangeHandler(Recup_voltage)
-		voltageInput0.openWaitForAttachment(5000)
-		print(Tension_Phidget)
-		print(len(Tension_Phidget))  
+		Temps.append(time.time() - start_time)
+		voltageInput0.openWaitForAttachment(1000)
+		Tension_Phidget_echantillon.append(voltageInput0.getVoltage()) # getVoltage() : (Tension la plus récente du channel Phidget) https://www.phidgets.com/?view=api&product_id=VCP1000_0&lang=Python
+		print(Tension_Phidget_echantillon)
+		print(len(Tension_Phidget_echantillon))  
 		voltageInput0.close() 
+	return Temps, Tension_Phidget_echantillon
 	
 
 def main_2(n): # 
