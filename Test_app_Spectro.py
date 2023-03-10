@@ -41,7 +41,7 @@ def Recup_tension_Phidget(n):
     while (time.time() - start_time) < n+1: # Tant la durée de simulation n'a pas duré 10s on applique la boucle
         print(time.time() - start_time)
         Temps.append(time.time() - start_time)
-        voltageInput0.openWaitForAttachment(1000)
+        voltageInput0.openWaitForAttachment(5000) # Conseil: mettre 5000=5s si 5000> l'ordi n'a plus le temps de reconnaître le phidget
         Tension_Phidget_echantillon.append(voltageInput0.getVoltage()) # getVoltage() : (Tension la plus récente du channel Phidget) https://www.phidgets.com/?view=api&product_id=VCP1000_0&lang=Python
         print(Tension_Phidget_echantillon)
         print(len(Tension_Phidget_echantillon))  
@@ -151,7 +151,7 @@ class App(customtkinter.CTk):
         # create third frame
         self.third_frame = customtkinter.CTkFrame(self, corner_radius=0, fg_color="transparent")
 
-            # Bouton Page Continu
+        # Bouton Page Continu
         self.third_frame_button_1= customtkinter.CTkButton(self.third_frame, text="Acquisition continu" , command=self.Acquisition)
         self.third_frame_button_1.grid(row=1, column=0, padx=20, pady=10)
 
@@ -203,8 +203,9 @@ class App(customtkinter.CTk):
    # Méthode pour l'analyse des données 
 
     def Acquisition_graph_balayage(self): # Tracer un graphique pour le balayage x=longueur d'onde / y= Tension
-        x = np.linspace(400,800,10)# 10=nombre d'échantillon 
-        y =  Recup_tension_Phidget(n=10) [1]
+        n=10
+        x = np.linspace(400,800,n)# 10=nombre d'échantillon 
+        y =  Recup_tension_Phidget(n) [1]
         plt.plot(x, y)
         plt.xlabel("Longueur d'onde (nm)")
         plt.ylabel('Tension du Phidget (Volt)')
@@ -218,13 +219,6 @@ class App(customtkinter.CTk):
         plt.ylabel('Tension du Phidget (Volt)')
         plt.title("Mode Continu")
         plt.show()
-   
-    def Zero(self): # Réinitialiser la liste Tension_Phidget 
-        Tension_Phidget=[]
-
-
-
-
 
     def Acquisition(self):        
         L=[]
