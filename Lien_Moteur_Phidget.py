@@ -14,22 +14,9 @@ Le code définit deux fonctions: Recup_voltage et main.
 Problèmes
 """
 # Variables
-Tension_Phidget=[]
-def creation_Liste():
-	L= []
-	return L
 
 
-# Class Phidget
-def Recup_voltage(self, voltage):  # Méthode qui stocke la tension du Phidget dans la liste L	
-	Tension_Phidget.append(voltage)
-	#print(Tension_Phidget)
-	
-"""
-La fonction Recup_voltage prend deux arguments: self et tension. 
 
-Il ajoute la valeur de tension à une liste L et imprime le contenu actuel de L.
-"""
 s = serial.Serial('COM5', 115200)
 
 s.write("\r\n\r\n".encode()) # encode pour convertir "\r\n\r\n" 
@@ -44,12 +31,12 @@ def deplacement(pas): # Fonction qui pilote le moteur
      
     
 
-def main_1(n):  # Fonction choisi pour l'app 
+def main_1(n):  # n: distance parcouru par la vis
     Tension_Phidget_echantillon= []
     i=0
     pas=0.5 # 0.5mm Pas de la vis (cf Exel)
 
-    Longeur_d_onde=[]
+    Longueur_d_onde=[]
     
     voltageInput0 = VoltageInput()
     
@@ -63,18 +50,22 @@ def main_1(n):  # Fonction choisi pour l'app
         Tension_Phidget_echantillon.append(voltageInput0.getVoltage()) # getVoltage() : (Tension la plus récente du channel Phidget) https://www.phidgets.com/?view=api&product_id=VCP1000_0&lang=Python
         time.sleep(0.25) # 250ms entre valeur de tension du phidget (cf doc phigdet 20bits)
         Tension_Phidget_echantillon.append(voltageInput0.getVoltage())
-        Longeur_d_onde.append(20*i +400) # Je suppose que l'on part à 400nm 
+        Longueur_d_onde.append(20*i +400) # Je suppose que l'on part à 400nm 
+        print(Longueur_d_onde)
+        print(Tension_Phidget_echantillon)
         deplacement(i+pas)
         time.sleep(7.49) # Comme $110 =4mm/min et le pas de vis est de 0.5mm => Le moteur réalise un pas de vis en 7.49s
         i+=pas
 
+        print(i)
+
         
 
-        print(Longeur_d_onde)
+        print(Longueur_d_onde)
         print(Tension_Phidget_echantillon)
         print(len(Tension_Phidget_echantillon))
-        print(Longeur_d_onde)  
-        voltageInput0.close() 
-    return  Tension_Phidget_echantillon
+        voltageInput0.close()
+    deplacement(-i)
+    return  Longueur_d_onde, Tension_Phidget_echantillon
 
 main_1(n=2)
