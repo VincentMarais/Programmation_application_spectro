@@ -64,9 +64,12 @@ def main_1(n):  # Fonction choisi pour l'app
         time.sleep(0.25) # 250ms entre valeur de tension du phidget (cf doc phigdet 20bits)
         Tension_Phidget_echantillon.append(voltageInput0.getVoltage())
         Longeur_d_onde.append(20*i +400) # Je suppose que l'on part à 400nm 
-
-        deplacement(pas)
+        deplacement(i+pas)
+        time.sleep(7.49) # Comme $110 =4mm/min et le pas de vis est de 0.5mm => Le moteur réalise un pas de vis en 7.49s
         i+=pas
+
+        
+
         print(Longeur_d_onde)
         print(Tension_Phidget_echantillon)
         print(len(Tension_Phidget_echantillon))
@@ -74,4 +77,4 @@ def main_1(n):  # Fonction choisi pour l'app
         voltageInput0.close() 
     return  Tension_Phidget_echantillon
 
-main_1(n=3)
+main_1(n=2)
