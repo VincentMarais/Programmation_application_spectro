@@ -10,85 +10,38 @@ import numpy as np
 from PIL import Image
 import os
 import serial  
+import openpyxl
+
+workbook = openpyxl.Workbook() # Variable global pour la création du exel
 
 
 
-# Variables
-
-
-# Tension_Phidget_echantillon= []
 
 
 
-# Classe Phidget
-s = serial.Serial('COM5', 115200)
-
-s.write("\r\n\r\n".encode()) # encode pour convertir "\r\n\r\n" 
-time.sleep(2)   # Attend initialisation un GRBL
-s.flushInput()  # Vider le tampon d'entrée, en supprimant tout son contenu.
 
 
 
-def deplacement(pas): # Fonction qui pilote le moteur
-        gcode_1= 'G0 X' + str(pas) + '\n'
-        s.write(gcode_1.encode())
-"""
-# La fonction Recup_voltage prend deux arguments: self et tension. 
+## Creation d'un fichier exel
+def stocke_liste_exel(L,lettre, titre): # L: Liste a stocké dans le exel / lettre: lettre de la colonne du exel / titre: titre de la colonne
+    workbook = openpyxl.Workbook()
 
-#Il ajoute la valeur de tension à une liste L et imprime le contenu actuel de L.
-"""
-def main(n):  
-    Tension_Phidget_echantillon= []
-    i=0
-    pas=0.5 # 0.5mm Pas de la vis (cf Exel)
+    # Sélectionner la feuille de calcul active
+    worksheet = workbook.active
 
-    Longueur_d_onde=[]
-    
-    voltageInput0 = VoltageInput()
-    
-    voltageInput0.setHubPort(0) 
-	
-    voltageInput0.setDeviceSerialNumber(626587)
-	
-	# Temps initial machine depuis 1er Janvier 1970 en second 
-    while i < n: # Tant la durée de simulation n'a pas duré 10s on applique la boucle
-        voltageInput0.openWaitForAttachment(1000)
-        Tension_Phidget_echantillon.append(voltageInput0.getVoltage()) # getVoltage() : (Tension la plus récente du channel Phidget) https://www.phidgets.com/?view=api&product_id=VCP1000_0&lang=Python
-        time.sleep(0.25) # 250ms entre valeur de tension du phidget (cf doc phigdet 20bits)
-        Tension_Phidget_echantillon.append(voltageInput0.getVoltage())
-        Longueur_d_onde.append(20*i +400) # Je suppose que l'on part à 400nm 
-        deplacement(i+pas)
-        time.sleep(7.49) # Comme $110 =4mm/min et le pas de vis est de 0.5mm => Le moteur réalise un pas de vis en 7.49s
-        i+=pas
+    # Donner un nom à la colonne
+    worksheet[lettre + '1'] = titre
 
-        print(i)
+    # Les valeurs de la liste
 
-        
+    # Ajouter chaque élément de la liste dans une cellule de la colonne A
+    for i, valeur in enumerate(L):
+        cellule = lettre + str(i+2)
+        worksheet[cellule] = valeur
 
-        print(Longueur_d_onde)
-        print(Tension_Phidget_echantillon)
-        print(len(Tension_Phidget_echantillon))
-        voltageInput0.close() 
-    return  Longueur_d_onde, Tension_Phidget_echantillon
-"""
-La fonction main prend un argument n et effectue les étapes suivantes:
+    # Enregistrer le classeur Excel
+    workbook.save('expérience_VARIAN.xlsx')
 
-1) Crée une instance de la classe VoltageInput et l'assigne à la variable voltageInput0.
-
-2) Appelle la méthode setHubPort sur voltageInput0 et définit le port de l'hub à 0.
-
-3) Appelle la méthode setDeviceSerialNumber sur voltageInput0 et définit le numéro de série à 626587.
-
-4) Exécute une boucle for n fois.
-	1. Dans chaque itération de la boucle, il appelle la méthode setOnVoltageChangeHandler sur voltageInput0 et définit la fonction 
-		de gestionnaire à Recup_voltage.
-
-	2. Appelle la méthode openWaitForAttachment sur voltageInput0 avec un argument de 5000 millisecondes (5 secondes), 
-	   ce qui ouvre une connexion au dispositif d'entrée de tension Phidget et attend qu'il soit attaché.
-
-	3. Appelle la méthode close sur voltageInput0, qui ferme la connexion au dispositif d'entrée de tension Phidget.
-
-"""
 
 
 ## Classe Application
@@ -101,6 +54,8 @@ customtkinter.set_default_color_theme("dark-blue")  # Themes: "blue" (standard),
 class App(customtkinter.CTk):
     def __init__(self):
         super().__init__()
+
+        
 
         self.title("Application VARIAN 634")
         self.geometry("700x450")
@@ -155,32 +110,99 @@ class App(customtkinter.CTk):
         self.home_frame.grid_columnconfigure(0, weight=1)
 
         self.home_frame_large_image_label = customtkinter.CTkLabel(self.home_frame, text="", image=self.large_test_image)
-        self.home_frame_large_image_label.grid(row=0, column=0, padx=20, pady=10)
+        self.home_frame_large_image_label.grid(row=0, column=0, padx=10, pady=10)
 
         self.home_frame_button_1 = customtkinter.CTkButton(self.home_frame, text="INFORMATIONS", image=self.image_icon_image)
-        self.home_frame_button_1.grid(row=1, column=0, padx=20, pady=10)
-     
-        # create second frame
+        self.home_frame_button_1.grid(row=1, column=0, padx=10, pady=10)
+
+        self.home_frame_port_arduino = customtkinter.CTkEntry(self.home_frame, width=200, placeholder_text="Numéro de port arduino ('COM')")
+        self.home_frame_port_arduino.grid(row=2, column=0, padx=30, pady=10)
+
+        #self.home_frame_recup_port_arduino = customtkinter.CTkButton(self.home_frame, text="Port")
+        #self.home_frame_recup_port_arduino.grid(row=2, column=1, padx=10, pady=10)
+
+
+        # create second frame (page balayage)
         self.second_frame = customtkinter.CTkFrame(self, corner_radius=0, fg_color="transparent")
 
-            # Bouton Page Balayage
-        self.second_frame_button_1= customtkinter.CTkButton(self.second_frame, text="Acquisition balayage" , command=self.Acquisition)
-        self.second_frame_button_1.grid(row=1, column=0, padx=20, pady=10)
+        
+        self.second_frame = customtkinter.CTkTabview(self, width=250)
+        self.second_frame.grid(row=0, column=2, padx=(20, 0), pady=(20, 0), sticky="nsew")
+        self.second_frame.add("Acquisition blanc")
+        self.second_frame.add("Acquisition échantillon")
+        self.second_frame.tab("Acquisition blanc").grid_columnconfigure(0, weight=1)  # configure grid of individual tabs
+        self.second_frame.tab("Acquisition échantillon").grid_columnconfigure(0, weight=1)
 
-        self.second_frame_button_2= customtkinter.CTkButton(self.second_frame, text="Graphique balayage" , command=self.Acquisition_graph_balayage)
-        self.second_frame_button_2.grid(row=2, column=0, padx=20, pady=10)
-     
+        # Bontons page Balayage
+        self.second_frame_button_Distance_vis = customtkinter.CTkEntry(self.second_frame.tab("Acquisition blanc"), width=200, placeholder_text="Distance parcouru par la vis")
+        self.second_frame_button_Distance_vis.grid(row=2, column=0, padx=30, pady=(15, 15))
+        
+        self.second_frame_button_acquisition_blanc = customtkinter.CTkButton(self.second_frame.tab("Acquisition blanc"), text="Acquisition blanc",
+                                                           command=self.Acquisition_graph_balayage)
+        self.second_frame_button_acquisition_blanc.grid(row=3, column=0, padx=20, pady=(10, 10))
 
-        # create third frame
+        
+
+
+        self.second_frame_button_Distance_vis = customtkinter.CTkEntry(self.second_frame.tab("Acquisition échantillon"), width=200, placeholder_text="Distance parcouru par la vis")
+        self.second_frame_button_Distance_vis.grid(row=2, column=0, padx=30, pady=(15, 15))
+        
+        self.second_frame_button_acquisition_blanc = customtkinter.CTkButton(self.second_frame.tab("Acquisition échantillon"), text="Acquisition échantillon",
+                                                           command=self.Acquisition_graph_balayage)
+        self.second_frame_button_acquisition_blanc.grid(row=3, column=0, padx=20, pady=(10, 10))
+
+
+
+
+        # create third frame (page continu)
         self.third_frame = customtkinter.CTkFrame(self, corner_radius=0, fg_color="transparent")
 
-        # Bouton Page Continu
-        self.third_frame_button_1= customtkinter.CTkButton(self.third_frame, text="Acquisition continu" , command=self.Acquisition)
-        self.third_frame_button_1.grid(row=1, column=0, padx=20, pady=10)
+        # Bouton Page Continu   
 
-        self.third_frame_button_2= customtkinter.CTkButton(self.third_frame, text="Graphique continu" , command=self.Acquisition_graph_continu)
-        self.third_frame_button_2.grid(row=2, column=0, padx=20, pady=10)
+        self.third_frame = customtkinter.CTkTabview(self, width=250)
+        self.third_frame.grid(row=0, column=2, padx=(20, 0), pady=(20, 0), sticky="nsew")
+        self.third_frame.add("Acquisition blanc")
+        self.third_frame.add("Acquisition échantillon")
+        self.third_frame.tab("Acquisition blanc").grid_columnconfigure(0, weight=1)  # configure grid of individual tabs
+        self.third_frame.tab("Acquisition échantillon").grid_columnconfigure(0, weight=1)
 
+        # Bontons page continu
+        self.third_frame_button_Temps = customtkinter.CTkEntry(self.third_frame.tab("Acquisition blanc"), width=200, placeholder_text="Temps d'acquisition")
+        self.third_frame_button_Temps.grid(row=2, column=0, padx=30, pady=(15, 15))
+        
+        self.third_frame_button_longueur_d_onde = customtkinter.CTkEntry(self.third_frame.tab("Acquisition blanc"), width=200, placeholder_text="longueur d'onde")
+        self.third_frame_button_longueur_d_onde.grid(row=2, column=1, padx=30, pady=(15, 15))
+        self.third_frame_button_acquisition_blanc = customtkinter.CTkButton(self.third_frame.tab("Acquisition blanc"), text="Acquisition blanc",
+                                                           command=self.Acquisition_graph_continu)
+        self.third_frame_button_acquisition_blanc.grid(row=3, column=0, padx=20, pady=(10, 10))
+
+        
+
+
+        self.third_frame_button_Temps = customtkinter.CTkEntry(self.third_frame.tab("Acquisition échantillon"), width=200, placeholder_text="Temps d'acquisition")
+        self.third_frame_button_Temps.grid(row=2, column=0, padx=30, pady=(15, 15))
+        
+        self.third_frame_button_longueur_d_onde = customtkinter.CTkEntry(self.third_frame.tab("Acquisition échantillon"), width=200, placeholder_text="Longueur d'onde")
+        self.third_frame_button_longueur_d_onde.grid(row=2, column=1, padx=30, pady=(15, 15))
+        
+        self.second_frame_button_acquisition_echantillon = customtkinter.CTkButton(self.third_frame.tab("Acquisition échantillon"), text="Acquisition échantillon",
+                                                           command=self.Acquisition_graph_continu)
+        self.second_frame_button_acquisition_echantillon.grid(row=3, column=0, padx=20, pady=(10, 10))
+
+
+
+        ## Page Login pour flex
+        self.login_frame = customtkinter.CTkFrame(self, corner_radius=0)
+        self.login_frame.grid(row=0, column=0, sticky="ns")
+        self.login_label = customtkinter.CTkLabel(self.login_frame, text="Application Varian 643",
+                                                  font=customtkinter.CTkFont(size=20, weight="bold"))
+        self.login_label.grid(row=0, column=0, padx=30, pady=(150, 15))
+        self.username_entry = customtkinter.CTkEntry(self.login_frame, width=200, placeholder_text="username")
+        self.username_entry.grid(row=1, column=0, padx=30, pady=(15, 15))
+        self.password_entry = customtkinter.CTkEntry(self.login_frame, width=200, show="*", placeholder_text="password")
+        self.password_entry.grid(row=2, column=0, padx=30, pady=(0, 15))
+        self.login_button = customtkinter.CTkButton(self.login_frame, text="Login", command=self.login_event, width=200)
+        self.login_button.grid(row=3, column=0, padx=30, pady=(15, 15))
 
 
         # select default frame
@@ -222,11 +244,146 @@ class App(customtkinter.CTk):
     def sidebar_button_event(self):
         print("sidebar_button click")
    
+    # Fonction pour acquérir les données page login :
 
-   # Méthode pour l'analyse des données 
+    def login_event(self):
+        print("Login pressed - username:", self.username_entry.get(), "password:", self.password_entry.get())
+
+        self.login_frame.grid_forget()  # remove login frame
+        self.select_frame_by_name("home")
+
+    # Fonction pour acquérir les données page balayage :
+
+    def Recup_donnees_page_balayage(self):
+        Distance=self.second_frame_button_Distance_vis.get()
+        print("Distance d'acquisition:", Distance)
+        
+        self.second_frame.tab("Acquisition blanc").grid_forget()  # remove 
+        self.select_frame_by_name("frame_2")
+    
+        return Distance
+    
+    # Fonction pour acquérir les données page continue :
+
+    def Recup_donnees_page_continu(self):
+        Longueur_d_onde=self.third_frame_button_longueur_d_onde.get()
+        Temps=self.third_frame_button_Temps.get()
+        print("Temps d'acquisition:", Temps, "Longueur d'onde d'acquisition:", Longueur_d_onde )
+        
+        self.second_frame.tab("Acquisition blanc").grid_forget()  # remove 
+        self.select_frame_by_name("frame_3")
+    
+        return Temps, Longueur_d_onde
+
+    def Recup_port_arduino(self):
+        Port=self.home_frame_port_arduino.get()
+        print("Port arduino", Port)     
+        
+        return Port
+
+   # Fonction pour le moteur
+
+    def Initialisation_arduino(self):
+        s = serial.Serial(self.Recup_port_arduino, 115200)
+
+        s.write("\r\n\r\n".encode()) # encode pour convertir "\r\n\r\n" 
+        time.sleep(2)   # Attend initialisation un GRBL
+        s.flushInput()  # Vider le tampon d'entrée, en supprimant tout son contenu.
+        return s 
+    
+    def deplacement(self,pas): # Fonction qui pilote le moteur
+        s= self.Initialisation_arduino
+        gcode_1= 'G0 X' + str(pas) + '\n'
+        s.write(gcode_1.encode())
+
+    
+    # Fonction Phidget
+
+    def mode_balayage(self,n): # n c'est la distance en mm que doit parcourir la vis    
+        Tension_Phidget_echantillon= []
+        i=0
+        pas=0.5 # 0.5mm Pas de la vis (cf Exel)
+
+        Longueur_d_onde=[]
+        
+        voltageInput0 = VoltageInput()
+        
+        voltageInput0.setHubPort(0) 
+        
+        voltageInput0.setDeviceSerialNumber(626587)
+        
+        while i < n: # Tant la durée de simulation n'a pas duré 10s on applique la boucle
+            voltageInput0.openWaitForAttachment(1000)
+            Tension_Phidget_echantillon.append(voltageInput0.getVoltage()) # getVoltage() : (Tension la plus récente du channel Phidget) https://www.phidgets.com/?view=api&product_id=VCP1000_0&lang=Python
+            Longueur_d_onde.append(20*i +400) # Je suppose que l'on part à 400nm 
+            self.deplacement(i+pas)
+            time.sleep(7.49) # Comme $110 =4mm/min et le pas de vis est de 0.5mm => Le moteur réalise un pas de vis en 7.49s
+            i+=pas
+
+            print(i)        
+
+            print(Longueur_d_onde)
+            print(Tension_Phidget_echantillon)
+            print(len(Tension_Phidget_echantillon))
+            voltageInput0.close() 
+        self.deplacement(-n) # Le moteur retourne à sa position initial
+        stocke_liste_exel(Longueur_d_onde,'A', "Longueur d'onde (nm) ")
+        stocke_liste_exel(Tension_Phidget_echantillon, 'B', 'Tension (Volt)')
+        return  Longueur_d_onde, Tension_Phidget_echantillon
+
+        """
+        La fonction mode_balayage prend un argument n et effectue les étapes suivantes:
+
+        1) Crée une instance de la classe VoltageInput et l'assigne à la variable voltageInput0.
+
+        2) Appelle la méthode setHubPort sur voltageInput0 et définit le port de l'hub à 0.
+
+        3) Appelle la méthode setDeviceSerialNumber sur voltageInput0 et définit le numéro de série à 626587.
+
+        4) Exécute une boucle for n fois.
+            1. Dans chaque itération de la boucle, il appelle la méthode setOnVoltageChangeHandler sur voltageInput0 et définit la fonction 
+                de gestionnaire à Recup_voltage.
+
+            2. Appelle la méthode openWaitForAttachment sur voltageInput0 avec un argument de 5000 millisecondes (5 secondes), 
+            ce qui ouvre une connexion au dispositif d'entrée de tension Phidget et attend qu'il soit attaché.
+
+            3. Appelle la méthode close sur voltageInput0, qui ferme la connexion au dispositif d'entrée de tension Phidget.
+
+        """
+
+
+    def mode_continu(self,n,lanbda): # n c'est le temps d'acquisition et landba la longueur d'onde souhaité par l'utilisateur    
+        Tension_Phidget_echantillon= []
+        
+        Temps=[]
+
+        voltageInput0 = VoltageInput()
+        
+        voltageInput0.setHubPort(0) 
+        
+        voltageInput0.setDeviceSerialNumber(626587)
+        
+        d= (lanbda - 400)/20,8 # Où d est la course de la vis / ici on suppose que l'on travail dans le visible => [400nm,800nm] / la course de la vis 20.8mm
+        
+        self.deplacement(d)
+
+        start_time = time.time() # Temps initial machine depuis 1er Janvier 1970 en second 
+        while (time.time() - start_time) < n+1: # Tant la durée de simulation n'a pas duré 10s on applique la boucle
+            print(time.time() - start_time)
+            Temps.append(time.time() - start_time)
+            voltageInput0.openWaitForAttachment(1000)
+            Tension_Phidget_echantillon.append(voltageInput0.getVoltage()) # getVoltage() : (Tension la plus récente du channel Phidget) https://www.phidgets.com/?view=api&product_id=VCP1000_0&lang=Python
+            print(Tension_Phidget_echantillon)
+            print(len(Tension_Phidget_echantillon))  
+            voltageInput0.close() 
+        self.deplacement(-d)
+        stocke_liste_exel(Temps,'A', 'Temps (s)')
+        stocke_liste_exel(Tension_Phidget_echantillon, 'B', 'Tension (Volt)')
+        return Temps, Tension_Phidget_echantillon
+
 
     def Acquisition_graph_balayage(self): # Tracer un graphique pour le balayage x=longueur d'onde / y= Tension
-        [x,y]= Recup_tension_Phidget(n=5) 
+        [x,y]= self.mode_balayage(self.Recup_donnees_page_balayage) # Ici l'utilisateur veut aller à 5mm 
         plt.plot(x, y)
         plt.xlabel("Longueur d'onde (nm)")
         plt.ylabel('Tension du Phidget (Volt)')
@@ -234,19 +391,14 @@ class App(customtkinter.CTk):
         plt.show()
     
     def Acquisition_graph_continu(self): # Tracer un graphique pour le continu
-        [x,y]= Recup_tension_Phidget(n=10)         
+        [x,y]= self.mode_continu(self.Recup_donnees_page_continu[0],self.Recup_donnees_page_continu[1]) # Ici L'utilisateur veut aller à la longueur d'onde 543nm et une mesure pendant 10s  
         plt.plot(x, y)
         plt.xlabel("Temps (s)")
         plt.ylabel('Tension du Phidget (Volt)')
         plt.title("Mode Continu")
         plt.show()
 
-    def Acquisition(self):        
-        L=[]
-        Recup_tension_Phidget(n=10)
-
-
-
+    
 
 if __name__ == "__main__":
     app = App()
@@ -256,32 +408,4 @@ if __name__ == "__main__":
 
 
 
-"""
-La fonction main prend un argument n et effectue les étapes suivantes:
-
-1) Crée une instance de la classe VoltageInput et l'assigne à la variable voltageInput0.
-
-2) Appelle la méthode setHubPort sur voltageInput0 et définit le port de l'hub à 0.
-
-3) Appelle la méthode setDeviceSerialNumber sur voltageInput0 et définit le numéro de série à 626587.
-
-4) Exécute une boucle for n fois.
-	1. Dans chaque itération de la boucle, il appelle la méthode setOnVoltageChangeHandler sur voltageInput0 et définit la fonction 
-		de gestionnaire à Recup_voltage.
-
-	2. Appelle la méthode openWaitForAttachment sur voltageInput0 avec un argument de 5000 millisecondes (5 secondes), 
-	   ce qui ouvre une connexion au dispositif d'entrée de tension Phidget et attend qu'il soit attaché.
-
-	3. Appelle la méthode close sur voltageInput0, qui ferme la connexion au dispositif d'entrée de tension Phidget.
-
-"""
-class Moteur:
-    """
-    Classe Moteur : permet de controler le moteur (subclass de App)
-    
-    """
-    def __init__(self) -> None:
-         pass
-
-	
 

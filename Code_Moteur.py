@@ -17,4 +17,4 @@ def deplacement(pas): # Fonction qui pilote le moteur
 
 
 
-deplacement(pas=2)  
+deplacement(pas=0.5)  

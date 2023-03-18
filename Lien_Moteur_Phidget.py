@@ -68,4 +68,4 @@ def main_1(n):  # n: distance parcouru par la vis
     deplacement(-i)
     return  Longueur_d_onde, Tension_Phidget_echantillon
 
-main_1(n=2)
+main_1(n=1)
