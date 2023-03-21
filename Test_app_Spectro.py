@@ -14,14 +14,6 @@ import openpyxl
 
 workbook = openpyxl.Workbook() # Variable global pour la création du exel
 
-
-
-
-
-
-
-
-
 ## Creation d'un fichier exel
 def stocke_liste_exel(L,lettre, titre): # L: Liste a stocké dans le exel / lettre: lettre de la colonne du exel / titre: titre de la colonne
     workbook = openpyxl.Workbook()
@@ -313,7 +305,7 @@ class App(customtkinter.CTk):
         voltageInput0.setDeviceSerialNumber(626587)
         
         while i < n: # Tant la durée de simulation n'a pas duré 10s on applique la boucle
-            voltageInput0.openWaitForAttachment(1000)
+            voltageInput0.openWaitForAttachment(5000)
             Tension_Phidget_echantillon.append(voltageInput0.getVoltage()) # getVoltage() : (Tension la plus récente du channel Phidget) https://www.phidgets.com/?view=api&product_id=VCP1000_0&lang=Python
             Longueur_d_onde.append(20*i +400) # Je suppose que l'on part à 400nm 
             self.deplacement(i+pas)
@@ -371,7 +363,7 @@ class App(customtkinter.CTk):
         while (time.time() - start_time) < n+1: # Tant la durée de simulation n'a pas duré 10s on applique la boucle
             print(time.time() - start_time)
             Temps.append(time.time() - start_time)
-            voltageInput0.openWaitForAttachment(1000)
+            voltageInput0.openWaitForAttachment(5000)
             Tension_Phidget_echantillon.append(voltageInput0.getVoltage()) # getVoltage() : (Tension la plus récente du channel Phidget) https://www.phidgets.com/?view=api&product_id=VCP1000_0&lang=Python
             print(Tension_Phidget_echantillon)
             print(len(Tension_Phidget_echantillon))  

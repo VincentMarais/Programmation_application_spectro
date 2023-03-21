@@ -46,7 +46,7 @@ def main_1(n):  # Fonction choisi pour l'app
 	while (time.time() - start_time) < n+1: # Tant la durée de simulation n'a pas duré 10s on applique la boucle
 		print(time.time() - start_time)
 		Temps.append(time.time() - start_time)
-		voltageInput0.openWaitForAttachment(1000)
+		voltageInput0.openWaitForAttachment(5000)
 		Tension_Phidget_echantillon.append(voltageInput0.getVoltage()) # getVoltage() : (Tension la plus récente du channel Phidget) https://www.phidgets.com/?view=api&product_id=VCP1000_0&lang=Python
 		print(Tension_Phidget_echantillon)
 		print(len(Tension_Phidget_echantillon))  
