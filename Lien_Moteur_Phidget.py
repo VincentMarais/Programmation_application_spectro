@@ -36,7 +36,7 @@ def etalonnage(d): # d: Distance que la vis doit parcourir en (mm)
     voltageInput0.setDeviceSerialNumber(626587)
 	
     while i < d: # Tant la durée de simulation n'a pas duré 10s on applique la boucle
-        voltageInput0.openWaitForAttachment()
+        voltageInput0.openWaitForAttachment(5000)
         Tension_Phidget_blanc.append(voltageInput0.getVoltage()) # getVoltage() : (Tension la plus récente du channel Phidget) https://www.phidgets.com/?view=api&product_id=VCP1000_0&lang=Python
         Longueur_d_onde.append(19.23*i +400) # Je suppose que l'on part à 400nm -> 0mm et que l'on fini à 800 nm --> 20.8mm => 19.23= coefficient directeur de la droite lambda = a*x + 400 nm où x position de la vis
         print(Longueur_d_onde)
@@ -71,7 +71,7 @@ def mode_precision(n):  # n: distance parcouru par la vis en mm/ Ici on mesure l
     voltageInput0.setDeviceSerialNumber(626587)
 	
     while i < n: # Tant la durée de simulation n'a pas duré 10s on applique la boucle
-        voltageInput0.openWaitForAttachment(1000)
+        voltageInput0.openWaitForAttachment(5000)
         Tension_Phidget_echantillon.append(voltageInput0.getVoltage()) # getVoltage() : (Tension la plus récente du channel Phidget) https://www.phidgets.com/?view=api&product_id=VCP1000_0&lang=Python
         Longueur_d_onde.append(19.23*i +400) # Je suppose que l'on part à 400nm -> 0mm et que l'on fini à 800 nm --> 20.8mm => 19.23= coefficient directeur de la droite lambda = a*x + 400 nm où x position de la vis
         print(Longueur_d_onde)
