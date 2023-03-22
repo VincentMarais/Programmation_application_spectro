@@ -34,6 +34,7 @@ def retour(pas):
 
     
 def etalonnage(d): # d: Distance que la vis doit parcourir en (mm)
+    Tension_Phidget_blanc=[]
     Longueur_d_onde=[]
     i=0
     pas=0.5 # 0.5mm Pas de la vis (cf Exel)
@@ -149,7 +150,7 @@ def acquisition_n_valeurs(d,vitesse): # d: distance à parcourir par la vis / vi
 
 
      
-def graph_absorbance():
+def graph_absorbance(Tension_Phidget_blanc):
     [x,y]=mode_rapide(20,4)
     y=np.log10(y/Tension_Phidget_blanc) # Définition de l'absorbance
     plt.plot(x,y)
