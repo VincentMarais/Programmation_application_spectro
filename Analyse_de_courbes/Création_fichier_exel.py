@@ -37,7 +37,7 @@ def sauvegarder_donnees(nom_fichier, longueurs_d_onde, tensions, titre_1, titre_
 
 p=[1,2,3]
 p.reverse()
-sauvegarder_donnees('mon_classeur.xlsx',  p, [2,3,5], 'longueurs_d_onde', 'Tension')
+sauvegarder_donnees('Analyse_de_courbes\mon_classeur.xlsx',  p, [2,3,5], 'longueurs_d_onde', 'Tension')
 
 def stocke_liste_exel(L,lettre, titre): # L: Liste a stocké dans le exel / lettre: lettre de la colonne du exel / titre: titre de la colonne
     workbook = openpyxl.Workbook()

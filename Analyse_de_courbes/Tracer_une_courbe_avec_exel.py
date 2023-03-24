@@ -1,16 +1,20 @@
+
 import pandas as pd
 import matplotlib.pyplot as plt
 import ezodf
+import numpy as np
+
 
 # Lire le fichier ODS
-data_1 = pd.read_csv('Manip\Manip_22_03_2023\solution_blanc.csv', encoding='ISO-8859-1')
-data_2= pd.read_csv('Manip\Manip_22_03_2023\expérience_1_echantillon_csv.csv', encoding='ISO-8859-1')
+data_1 = pd.read_csv('Manip\Manip_24_03_2023\Fente_0_5mm\solution_blanc.csv', encoding='ISO-8859-1')
+data_2= pd.read_csv('Manip\Manip_24_03_2023\Fente_0_5mm\solution_echantillon1.csv', encoding='ISO-8859-1')
 # Obtenir les colonnes D et E
-col_D = data_1['Longueur d\'onde (nm)']
-col_E = data_2['log']
+Longueur_donde = data_1['Longueur d\'onde (nm)']
+Tension_blanc = data_1['Tension blanc (Volt)']
+Tension_echantillon= data_2['Tension échantillon (Volt)']
+Absorbance=np.log10(np.abs(Tension_blanc)/np.abs(Tension_echantillon))
 
-# Tracer le graphe
-plt.plot(col_D, col_E)
+plt.plot(Longueur_donde, Absorbance)
 plt.xlabel('Nombre de point')
 plt.ylabel('Absorbance ')
 plt.title('Absorbance du bromophenol')
@@ -26,9 +30,9 @@ def maximum(liste):
 
     return p
 
-print(col_D[maximum(col_E)]) # Pic d'absorbance
-
-
+print(max(Absorbance))
+print(maximum(Absorbance))
+print(Longueur_donde[maximum(Absorbance)]) # Pic d'absorbance
 
 
 """
