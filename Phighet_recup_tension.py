@@ -1,6 +1,3 @@
-import tkinter
-import tkinter.messagebox
-import customtkinter
 from Phidget22.Phidget import *
 from Phidget22.Devices.VoltageInput import *
 import time # bibliothèque temps 
@@ -93,7 +90,7 @@ def main_3(n): # Méthode principal qui fait fonctionner le phidget
 
 		voltageInput0.close() # On appelle la méthode close qui ferme le programme		
 
-def main_4():
+def Data_Interval():
 	ch = VoltageInput()
 
 	ch.setHubPort(0) 
@@ -105,6 +102,13 @@ def main_4():
 	print("DataInterval: " + str(dataInterval))
 	
 	ch.close()
+
+
+"""
+Utilitaire
+
+"""
+
 main_1(10)
 
 
@@ -128,14 +132,7 @@ La fonction main prend un argument n et effectue les étapes suivantes:
 	3. Appelle la méthode close sur voltageInput0, qui ferme la connexion au dispositif d'entrée de tension Phidget.
 
 """
-def graph(n):
-	x = np.linspace(0, n, n) # 100=nombre d'échantillon
-	y =  np.sin(x)
-	plt.plot(x, y)
-	plt.xlabel("Longueur d'onde (nm) ")
-	plt.ylabel('Tension du Phidget')
-	plt.title("Tension du phidghet en fonction de la longueur d'onde")
-	plt.show()
+
 
 
 
