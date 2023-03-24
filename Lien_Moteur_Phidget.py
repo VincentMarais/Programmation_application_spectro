@@ -24,14 +24,40 @@ DEPLACEMENT DU MOTEUR
 
 """
 
+def maximum(liste):
+    maxi = liste[0]
+    p=0
+    for i in range(len(liste)):
+        if liste[i] > maxi:
+            p = i
+            maxi=liste[i]
+
+    return p
+
+def etat_mot():
+    g_code='?' + '\n'
+    s.write(g_code.encode())
+
+    return s.read(10)
+
+def param_mot():
+    
+    g_code='$G' + '\n'
+    s.write(g_code.encode())
+    print(s.read(75))
+    
 
 def deplacement(pas): # Fonction qui pilote le moteur      
         gcode_1= 'G0X' + str(pas) + '\n'
         s.write(gcode_1.encode())
+        
 
 
 def retour(pas):
         g_code= '$110=10'+ '\n'
+        s.write(g_code.encode())
+        time.sleep(0.5)
+        g_code= 'G91'+ '\n'
         s.write(g_code.encode())
         time.sleep(0.5)
         gcode_1= 'G0X-' + str(pas) + '\n'
@@ -158,14 +184,26 @@ def sauvegarder_donnees(nom_fichier, longueurs_d_onde, tensions, titre_1, titre_
 def solution_blanc(d, n, vitesse, nom_du_fichier_blanc):
     [Longueur_donde,Tension_blanc] = mode_precision(d,n,vitesse)
     sauvegarder_donnees(nom_du_fichier_blanc, Longueur_donde, Tension_blanc, 'Longueur d\'onde (nm)', 'Tension blanc (Volt)')
-    time.sleep(0.5)
+    s=str(etat_mot())
+    while 'Idle' not in s:
+        s=str(etat_mot())
+    
+    param_mot()
     retour(d)
+    param_mot()
 
 def solution_echantillon(d, n, vitesse,nom_du_fichier_echantillon): # Départ 7.25mm / 21 - 7.25 = 13.75mm où 21 course de la vis total de la vis => d=13.75mm
     [Longueur_d_onde, Tension_echantillon] = mode_precision(d,n, vitesse)
     sauvegarder_donnees(nom_du_fichier_echantillon, Longueur_d_onde, Tension_echantillon, 'Longueur d\'onde (nm)', 'Tension échantillon (Volt)')
-    time.sleep(0.5)
+    s=str(etat_mot())
+    while 'Idle' not in s:
+        s=str(etat_mot())
+
+    print(s)
+
+    param_mot()
     retour(d)
+    param_mot()
 
 """
 AFFICHAGE DES DONNEES
@@ -173,14 +211,16 @@ AFFICHAGE DES DONNEES
 
 
 def graph(nom_du_fichier_blanc, nom_du_fichier_echantillon, nom_echantillon):
-    data_1 = pd.read_excel(nom_du_fichier_blanc)
-    data_2= pd.read_excel(nom_du_fichier_echantillon)
+    data_1 = pd.read_csv(nom_du_fichier_blanc,  encoding='ISO-8859-1')
+    data_2= pd.read_csv(nom_du_fichier_echantillon,  encoding='ISO-8859-1')
 
 # Obtenir les colonnes 'Longueur d\'onde' et Tension Blanc et Tension echantillon
     Longueur_donde = data_1['Longueur d\'onde (nm)']
     Tension_blanc = data_1['Tension blanc (Volt)']
     Tension_echantillon= data_2['Tension échantillon (Volt)']
     Absorbance=np.log10(np.abs(Tension_blanc)/np.abs(Tension_echantillon))
+# Longueur d'onde d'absorbance
+    print( "Longueur d'onde d'absorbance : ", Longueur_donde[maximum(Absorbance)])
 # Tracer le graphe
     plt.plot(Longueur_donde, Absorbance)
     plt.xlabel('Longueur d\'onde (nm)')
@@ -202,11 +242,13 @@ def acquisition(d, n, vitesse, nom_du_fichier_blanc, nom_du_fichier_echantillon,
         solution_echantillon(d, n, vitesse, nom_du_fichier_echantillon)
         time.sleep(0.5)
         graph(nom_du_fichier_blanc, nom_du_fichier_echantillon, nom_echantillon)
+        print("Longueur d'onde d'absorbance : " )
     else:
         print("Sélectionner le mode 0 ou 1")
 
 #mode_precision(0.75,4)
 
-acquisition(0.75,5,4,'solution_blanc.csv','solution_blanc.csv', 'bromophenol') # Distance 13.75 mm / 260 points / vitesse = 4mm/min
+acquisition(14,200,4,'solution_blanc.csv','solution_echantillon1.csv', ' bromophenol') # Distance 13.75 mm / 260 points / vitesse = 4mm/min
 
 
+#param_mot()
