@@ -15,9 +15,12 @@ def maximum(liste):
 
     return p
 
+Chemin_acces="Manip\Manip_24_03_2023\Fente_0_2mm"
+
 # Lire le fichier ODS
-data_1 = pd.read_csv('Manip\Manip_24_03_2023\Fente_0_5mm\solution_blanc.csv', encoding='ISO-8859-1')
-data_2= pd.read_csv('Manip\Manip_24_03_2023\Fente_0_5mm\solution_echantillon1.csv', encoding='ISO-8859-1')
+data_1 = pd.read_csv(Chemin_acces +'\solution_blanc.csv', encoding='ISO-8859-1')
+data_2= pd.read_csv(Chemin_acces +'\solution_echantillon1.csv', encoding='ISO-8859-1')
+
 
 # Obtenir les colonnes D et E
 Longueur_donde = data_1['Longueur d\'onde (nm)']

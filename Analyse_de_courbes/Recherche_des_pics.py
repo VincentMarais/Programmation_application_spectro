@@ -10,10 +10,11 @@ window_width = 10
 # Définir la taille de la fenêtre de lissage
 smoothing_window_size = 5
 
+Chemin_acces="Manip\Manip_24_03_2023\Fente_0_2mm"
 
 # Lire le fichier ODS
-data_1 = pd.read_csv('Manip\Manip_24_03_2023\Fente_1mm\solution_blanc.csv', encoding='ISO-8859-1')
-data_2= pd.read_csv('Manip\Manip_24_03_2023\Fente_1mm\solution_echantillon1.csv', encoding='ISO-8859-1')
+data_1 = pd.read_csv(Chemin_acces +'\solution_blanc.csv', encoding='ISO-8859-1')
+data_2= pd.read_csv(Chemin_acces +'\solution_echantillon1.csv', encoding='ISO-8859-1')
 
 # Obtenir les colonnes D et E
 Longueur_donde = data_1['Longueur d\'onde (nm)']
@@ -34,7 +35,7 @@ for i in peaks:
 
 # Sauvegarde des coordonnées des pics dans un fichier CSV
 df = pd.DataFrame({'Longueur d\'onde (nm)': Longueur_donde[peaks], 'Absorbance': Absorbance[peaks]})
-df.to_csv('Analyse_de_courbes\peaks.csv', index=False)
+df.to_csv(Chemin_acces +'\peaks.csv', index=False)
 
 plt.plot(Longueur_donde, smoothed_absorbance)
 plt.plot(Longueur_donde[peaks], smoothed_absorbance[peaks], 'ro')
