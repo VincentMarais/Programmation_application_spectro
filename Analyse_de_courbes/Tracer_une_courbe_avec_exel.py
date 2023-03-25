@@ -22,7 +22,7 @@ data_1 = pd.read_csv(Chemin_acces +'\solution_blanc.csv', encoding='ISO-8859-1')
 data_2= pd.read_csv(Chemin_acces +'\solution_echantillon1.csv', encoding='ISO-8859-1')
 
 
-# Obtenir les colonnes D et E
+# Obtenir les colonnes 
 Longueur_donde = data_1['Longueur d\'onde (nm)']
 Tension_blanc = data_1['Tension blanc (Volt)']
 Tension_echantillon= data_2['Tension échantillon (Volt)']
