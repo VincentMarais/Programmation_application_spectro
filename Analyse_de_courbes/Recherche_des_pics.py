@@ -10,17 +10,17 @@ window_width = 10
 # Définir la taille de la fenêtre de lissage
 smoothing_window_size = 5
 
-Chemin_acces="Manip\Manip_24_03_2023\Fente_0_2mm"
+Chemin_acces="Manip\Manip_22_03_2023"
 
 # Lire le fichier ODS
-data_1 = pd.read_csv(Chemin_acces +'\solution_blanc.csv', encoding='ISO-8859-1')
-data_2= pd.read_csv(Chemin_acces +'\solution_echantillon1.csv', encoding='ISO-8859-1')
+data_1 = pd.read_csv(Chemin_acces +'\expérience_1_echantillon_csv.csv', encoding='ISO-8859-1')
+data_2= pd.read_csv(Chemin_acces +'\solution_blanc.csv', encoding='ISO-8859-1')
 
 # Obtenir les colonnes D et E
-Longueur_donde = data_1['Longueur d\'onde (nm)']
-Tension_blanc = data_1['Tension blanc (Volt)']
-Tension_echantillon= data_2['Tension échantillon (Volt)']
-Absorbance=np.log10(np.abs(Tension_blanc)/np.abs(Tension_echantillon))
+Longueur_donde = data_2['Longueur d\'onde (nm)']
+#Tension_blanc = data_1['Tension blanc (Volt)']
+#Tension_echantillon= data_2['Tension échantillon (Volt)']
+Absorbance=data_1['log'] # np.log10(np.abs(Tension_blanc)/np.abs(Tension_echantillon))
 
 # Lissage de la courbe d'absorbance
 smoothed_absorbance = Absorbance.rolling(smoothing_window_size, center=True).mean()
