@@ -200,7 +200,7 @@ def maximum(liste):
     return p
 
 
-def graph(nom_du_fichier_blanc, nom_du_fichier_echantillon, nom_echantillon):
+def graph(nom_du_fichier_blanc, nom_du_fichier_echantillon, nom_echantillon): # nom_du_fichier_blanc, nom_du_fichier_echantillon: (str) Chemin d'acces des fichier creer pour l'expérience 
     data_1 = pd.read_csv(nom_du_fichier_blanc,  encoding='ISO-8859-1')
     data_2= pd.read_csv(nom_du_fichier_echantillon,  encoding='ISO-8859-1')
 
@@ -209,14 +209,36 @@ def graph(nom_du_fichier_blanc, nom_du_fichier_echantillon, nom_echantillon):
     Tension_blanc = data_1['Tension blanc (Volt)']
     Tension_echantillon= data_2['Tension échantillon (Volt)']
     Absorbance=np.log10(np.abs(Tension_blanc)/np.abs(Tension_echantillon))
-# Longueur d'onde d'absorbance
-    print( "Longueur d'onde d'absorbance : ", Longueur_donde[maximum(Absorbance)])
-# Tracer le graphe
+    Pic_d_absorbance=max(Absorbance)
+    Pic_longueur_donde=Longueur_donde[maximum((Absorbance))]
+
+# Création du graphique
     plt.plot(Longueur_donde, Absorbance)
     plt.xlabel('Longueur d\'onde (nm)')
-    plt.ylabel('Absorbance ')
-    plt.title('Absorbance du' + nom_echantillon)
-    plt.show()  
+    plt.ylabel('Absorbance')
+    plt.title('Absorbance du '+ nom_echantillon)
+
+# Mise en évidence du point de pic en rouge
+    plt.scatter(Pic_longueur_donde, Pic_d_absorbance, color='red')
+
+
+# Annotation des coordonnées du point
+    plt.annotate('({:.2f} nm, {:.2f})'.format(Pic_longueur_donde, Pic_d_absorbance),
+             xy=(Pic_longueur_donde , Pic_d_absorbance),
+             xytext=(Pic_longueur_donde + 10 , Pic_d_absorbance),
+             fontsize=10,
+             color='red',
+             arrowprops=dict(facecolor='red', arrowstyle='->'))
+
+# Ligne pointillée reliant le point de pic à l'axe des x
+    plt.hlines(y=Pic_d_absorbance, xmin=Longueur_donde[0] , xmax=Pic_longueur_donde, linestyle='dashed', color='red')
+
+# Ligne pointillée reliant le point de pic à l'axe des y
+    plt.vlines(x=Pic_longueur_donde, ymin=min(Absorbance), ymax=Pic_d_absorbance, linestyle='dashed', color='red')
+# Affichage du graphique
+    plt.show()
+# Longueur d'onde d'absorbance
+ 
 
 
 """
