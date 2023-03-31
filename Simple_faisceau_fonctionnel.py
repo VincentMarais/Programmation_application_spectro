@@ -89,14 +89,11 @@ def mode_precision(d, n, vitesse):  # d: distance parcouru par la vis en mm/  n:
         voltageInput0.openWaitForAttachment(5000)
         Tension_Phidget_echantillon.append(voltageInput0.getVoltage()) # getVoltage() : (Tension la plus récente du channel Phidget) https://www.phidgets.com/?view=api&product_id=VCP1000_0&lang=Python
         Longueur_d_onde.append(19.23*i +400) # Je suppose que l'on part à 400nm -> 0mm et que l'on fini à 800 nm --> 20.8mm => 19.23= coefficient directeur de la droite lambda = a*x + 400 nm où x position de la vis
-        print(Longueur_d_onde)
-        print(Tension_Phidget_echantillon)
         deplacement(i+pas) # Le moteur travail en mode absolue par défaut G90 
         time.sleep(t) # Comme $110 =4mm/min et le pas de vis est de 0.5mm => Le moteur réalise un pas de vis en 7.49s
         i+=pas
 
-        print(i)        
-
+        print(i)     
         print(Longueur_d_onde)
         print(Tension_Phidget_echantillon)
         print(len(Longueur_d_onde))
@@ -242,7 +239,9 @@ def graph(nom_du_fichier_blanc, nom_du_fichier_echantillon, nom_echantillon): # 
 
 
 """
+
 UTILITAIRE
+
 
 """
 
@@ -259,7 +258,7 @@ def acquisition(d, n, vitesse, nom_du_fichier_blanc, nom_du_fichier_echantillon,
 
 #mode_precision(0.75,4)
 
-acquisition(14,200,4,'Manip\Manip_24_03_2023\solution_blanc1_24_03_2023.csv','solution_echantillon1_24_03_2023.csv', ' bromophenol') # Distance 13.75 mm / 260 points / vitesse = 4mm/min
+acquisition(14,200,4,'Manip\Manip_28_03_2023\solution_blanc1_28_03_2023.csv','Manip\Manip_28_03_2023\solution_echantillon1_28_03_2023.csv', ' bromophenol') # Distance 13.75 mm / 260 points / vitesse = 4mm/min
 
 # Date: 24/03/2023
 

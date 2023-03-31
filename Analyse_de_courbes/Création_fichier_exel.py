@@ -8,11 +8,13 @@ def sauvegarder_donnees(nom_fichier, longueurs_d_onde, tensions, titre_1, titre_
         for i in range(len(longueurs_d_onde)):
             writer.writerow([longueurs_d_onde[i], tensions[i]])
 
+my_list = [3, 8, 2, 7, 1, 9]
+max_index = my_list.index(max(my_list))
+print(max_index)  # Output: 5
 
 p=[1,2,3]
 p.reverse()
 sauvegarder_donnees('Analyse_de_courbes\mon_classeur.xlsx',  p, [2,3,5], 'longueurs_d_onde', 'Tension')
-
 def stocke_liste_exel(L,lettre, titre): # L: Liste a stocké dans le exel / lettre: lettre de la colonne du exel / titre: titre de la colonne
     workbook = openpyxl.Workbook()
 
