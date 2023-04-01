@@ -24,7 +24,7 @@ TEMPS_ATTENTE_PHIDGET=5000
 
 #VARIABLES
 CHEMIN_ACCES="Manip\Manip_31_03_2023\Fente_1mm"
-LISTE_NOM_FICHIER=['solution_blanc_UV_31_03_2023','solution_echantillon_UV_31_03_2023.csv']
+LISTE_NOM_FICHIER=['Tension_de_noir_31_03_2023.csv', 'solution_blanc_UV_31_03_2023','solution_echantillon_UV_31_03_2023.csv']
 NOM_ECHANTILLON='bromophenol'
 
 
@@ -273,6 +273,30 @@ def solution(course_vis, nombre_de_mesure, vitesse_translation, nom_du_fichier_e
     retour_vis(course_vis)
     param_mot()
 
+
+# Fonction pour acquérir le bruit de noir et retourne la 
+def acquisition_bruit_noir(nom_fichier_bruit_noir, nombre_de_mesure):
+    Tension_de_noir=[]
+    
+    voltageInput0 = VoltageInput()
+    
+    voltageInput0.setHubPort(PHIDGET_1_HUB_PORT) 
+	
+    voltageInput0.setDeviceSerialNumber(PHIDGET_SERIAL_NUMBER)
+
+    while len(Tension_de_noir)< nombre_de_mesure:
+        voltageInput0.openWaitForAttachment(TEMPS_ATTENTE_PHIDGET)
+        Tension_de_noir.append(voltageInput0.getVoltage())
+        print(Tension_de_noir)
+    
+    with open(nom_fichier_bruit_noir, 'w', newline='') as fichier_csv:
+        writer = csv.writer(fichier_csv)
+        writer.writerow(['Tension de noir (Volt)'])
+        for i in range(len(Tension_de_noir)):
+            writer.writerow([Tension_de_noir[i]])
+
+
+
 """
 ANALYSE DES DONNEES
 
@@ -341,18 +365,23 @@ def graph_mode_rapide():
 ACQUISITION
 """
 
-def acquisition(course_vis, nombre_de_mesures, vitesse_translation_vis, nom_du_fichier_blanc, nom_du_fichier_echantillon, nom_echantillon): 
-    mode=int(input("Choisir l'acquisition:"))
-    if mode==0:
+def acquisition(course_vis, nombre_de_mesures, vitesse_translation_vis, nom_du_fichier_bruit_de_noir, nom_du_fichier_blanc, nom_du_fichier_echantillon, nom_echantillon): 
+    mode=input("Choisir le mode d'acquisition (noir) / (blanc) / (echantillon) :")
+    if mode=='noir':
+        acquisition_bruit_noir(nom_du_fichier_bruit_de_noir,nombre_de_mesures)
+    
+    elif mode=='blanc':
         solution(course_vis, nombre_de_mesures, vitesse_translation_vis, nom_du_fichier_blanc, 'Tension blanc (Volt)') 
-    elif mode==1:
+    
+    elif mode=='echantillon':
         solution(course_vis, nombre_de_mesures, vitesse_translation_vis, nom_du_fichier_echantillon, 'Tension échantillon (Volt)')
         time.sleep(0.5) # Laiss
         graph(nom_du_fichier_blanc, nom_du_fichier_echantillon, nom_echantillon)
+    
     else:
-        print("Sélectionner le mode 0 ou 1")
+        print("Sélectionner le mode (blanc), (echantillon), (noir)")
 
 
-acquisition(7, 200, 4, CHEMIN_ACCES+LISTE_NOM_FICHIER[0],CHEMIN_ACCES+LISTE_NOM_FICHIER[1], NOM_ECHANTILLON) # course_vis 13.75 mm / 260 points / vitesse_translation_vis = 4mm/min
+acquisition(7, 200, 4, CHEMIN_ACCES+LISTE_NOM_FICHIER[0], CHEMIN_ACCES+LISTE_NOM_FICHIER[1],CHEMIN_ACCES+LISTE_NOM_FICHIER[2], NOM_ECHANTILLON) # course_vis 13.75 mm / 260 points / vitesse_translation_vis = 4mm/min
 
 
