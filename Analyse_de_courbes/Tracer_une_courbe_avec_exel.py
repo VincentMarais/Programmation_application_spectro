@@ -1,4 +1,5 @@
 import pandas as pd
+
 import matplotlib.pyplot as plt
 import ezodf
 import numpy as np
@@ -10,7 +11,7 @@ Chemin d'accès
 
 """
 
-Chemin_acces="Manip\Manip_28_03_2023"
+Chemin_acces="Manip\Manip_31_03_2023\Fente_2mm"
 
 
 """
@@ -27,8 +28,8 @@ def Indice_maximum(liste):
     return p
 
 # Lire le fichier ODS
-data_1 = pd.read_csv(Chemin_acces +'\solution_blanc1_28_03_2023.csv', encoding='ISO-8859-1')
-data_2= pd.read_csv(Chemin_acces +'\solution_echantillon1_28_03_2023.csv', encoding='ISO-8859-1')
+data_1 = pd.read_csv(Chemin_acces +'\solution_blanc_31_03_2023.csv', encoding='ISO-8859-1')
+data_2= pd.read_csv(Chemin_acces +'\solution_echantillon1_31_03_2023.csv', encoding='ISO-8859-1')
 
 
 # Obtenir les colonnes 
@@ -70,20 +71,19 @@ plt.show()
 
 
 
-"""
-# Ouverture du fichier ODS
-doc = ezodf.opendoc('Manip\Manip_22_03_2023\expérience_1_echantillon.ods')
 
-# Sélection de la première feuille de calcul
-sheet = doc.sheets[0]
+def ouvert_fichier_ods():
+    doc = ezodf.opendoc('Manip\Manip_22_03_2023\expérience_1_echantillon.ods')
 
-# Récupération des données dans une liste
-donnees = []
-for row in sheet.rows():
-    donnees.append([cell.value for cell in row])
+    # Sélection de la première feuille de calcul
+    sheet = doc.sheets[0]
 
-# Affichage des données
-for row in donnees:
-    print(row)
+    # Récupération des données dans une liste
+    donnees = []
+    for row in sheet.rows():
+        donnees.append([cell.value for cell in row])
 
-"""
+    # Affichage des données
+    for row in donnees:
+        print(row)
+

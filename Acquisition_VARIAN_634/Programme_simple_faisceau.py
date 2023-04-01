@@ -393,7 +393,7 @@ def acquisition(d, n, vitesse, nom_du_fichier_blanc, nom_du_fichier_echantillon,
 
 #mode_precision(0.75,4)
 
-acquisition(0.5,2,4,'Manip\Manip_28_03_2023\Fente_1mm\solution_blanc_28_03_2023.csv','Manip\Manip_28_03_2023\Fente_1mm\solution_echantillon_28_03_2023.csv', ' bromophenol') # Distance 13.75 mm / 260 points / vitesse = 4mm/min
+acquisition(14,200,4,'Manip\Manip_31_03_2023\Fente_2mm\solution_blanc_28_03_2023.csv','Manip\Manip_31_03_2023\Fente_2mm\solution_echantillon_28_03_2023.csv', ' bromophenol') # Distance 13.75 mm / 260 points / vitesse = 4mm/min
 
 # Date: 24/03/2023
 

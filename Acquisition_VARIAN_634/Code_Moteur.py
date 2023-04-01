@@ -129,4 +129,4 @@ s=str(etat_mot())
 while 'Idle' not in s:
     s=str(etat_mot())
 """
-deplacer_moteur(0.75,10)
+deplacer_moteur(-7,10)
