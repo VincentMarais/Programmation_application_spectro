@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-def main_1(n):  # Fonction choisi pour l'app 
+def main_1(Temps_d_acquisition):  # Fonction choisi pour l'app 
 	Tension_Phidget_echantillon= []
 
 	Temps=[]
@@ -17,7 +17,7 @@ def main_1(n):  # Fonction choisi pour l'app
 	voltageInput0.setDeviceSerialNumber(626587)
 	
 	start_time = time.time() # Temps initial machine depuis 1er Janvier 1970 en second 
-	while (time.time() - start_time) < n+1: # Tant la durée de simulation n'a pas duré 10s on applique la boucle
+	while (time.time() - start_time) < Temps_d_acquisition+1: # Tant la durée de simulation n'a pas duré 10s on applique la boucle
 		print(time.time() - start_time)
 		Temps.append(time.time() - start_time)
 		voltageInput0.openWaitForAttachment(5000)
@@ -27,6 +27,8 @@ def main_1(n):  # Fonction choisi pour l'app
 		voltageInput0.close() 
 	return Temps, Tension_Phidget_echantillon
 	
+
+
 def Data_Interval():
 	ch = VoltageInput()
 
@@ -41,11 +43,11 @@ def Data_Interval():
 	ch.close()
 
 
-
-main_1(10)
+Temps_d_acquisition=10
+main_1(Temps_d_acquisition)
 
 """
-La fonction main prend un argument n et effectue les étapes suivantes:
+La fonction main prend un argument Temps_d_acquisition et effectue les étapes suivantes:
 
 1) Crée une instance de la classe VoltageInput et l'assigne à la variable voltageInput0.
 

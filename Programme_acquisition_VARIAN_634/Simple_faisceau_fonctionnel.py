@@ -8,10 +8,9 @@ import csv
 import pandas as pd
 import re
 
-
+ 
 """
-INITIALISATION DE L'ARDUINO
-
+INITIALISATION DE L'ARDUINO + PHIDGET
 """
 # Constantes
 COM_PORT = 'COM5'
@@ -22,11 +21,6 @@ PHIDGET_SERIAL_NUMBER = 626587
 INITIALIZATION_TIME = 2
 TEMPS_ATTENTE_PHIDGET=5000
 
-#VARIABLES
-CHEMIN_ACCES="Manip\Manip_31_03_2023\Fente_1mm"
-LISTE_NOM_FICHIER=['Tension_de_noir_31_03_2023.csv', 'solution_blanc_UV_31_03_2023','solution_echantillon_UV_31_03_2023.csv']
-NOM_ECHANTILLON='bromophenol'
-
 
 # Initialisation arduino
 s = serial.Serial(COM_PORT, BAUD_RATE)
@@ -34,12 +28,9 @@ s.write("\r\n\r\n".encode()) # encode pour convertir "\r\n\r\n"
 time.sleep(INITIALIZATION_TIME)   # Attend initialisation un GRBL
 s.flushInput()  # Vider le tampon d'entrée, en supprimant tout son contenu.
 
-"""
-PHIDGET
-
-"""
 
 
+# Initialisation Phidget
 def detection_Phidget():
     voltage_input = VoltageInput()
     voltage_input.setHubPort(PHIDGET_1_HUB_PORT)
@@ -63,7 +54,6 @@ def lire_tension_phidget():
 
 """
 Caractérisation DU MOTEUR
-
 """
 
 def etat_mot():
@@ -260,9 +250,9 @@ def sauvegarder_donnees(nom_fichier, Liste_longueurs_d_onde, Liste_tensions, Lis
 
 
 
-def solution(course_vis, nombre_de_mesure, vitesse_translation, nom_du_fichier_echantillon, nom_colonne_tension): # Départ 7.25mm / 21 - 7.25 = 13.75mm où 21 course de la vis total de la vis => course_vis=13.75mm
+def solution(course_vis, nombre_de_mesure, vitesse_translation, fichier_echantillon, nom_colonne_tension): # Départ 7.25mm / 21 - 7.25 = 13.75mm où 21 course de la vis total de la vis => course_vis=13.75mm
     [Longueur_d_onde, Tension_echantillon, pas_de_vis] = mode_precision(course_vis, nombre_de_mesure, vitesse_translation)
-    sauvegarder_donnees(nom_du_fichier_echantillon, Longueur_d_onde, Tension_echantillon, pas_de_vis, 'Longueur d\'onde (nm)', nom_colonne_tension,'Liste_pas_vis')
+    sauvegarder_donnees(fichier_echantillon, Longueur_d_onde, Tension_echantillon, pas_de_vis, 'Longueur d\'onde (nm)', nom_colonne_tension,'Liste_pas_vis')
     s=str(etat_mot())
     while 'Idle' not in s: # 'Idle': Instruction GRBL pour dire ce que moteur est à l'arrêt / 'Run' le moteur tourne
         s=str(etat_mot())
@@ -275,12 +265,12 @@ def solution(course_vis, nombre_de_mesure, vitesse_translation, nom_du_fichier_e
 
 
 # Fonction pour acquérir le bruit de noir et retourne la 
-def acquisition_bruit_noir(nom_fichier_bruit_noir, nombre_de_mesure):
+def acquisition_bruit_noir(PHIDGET_HUB_PORT,nom_fichier_bruit_noir, nombre_de_mesure):
     Tension_de_noir=[]
     
     voltageInput0 = VoltageInput()
     
-    voltageInput0.setHubPort(PHIDGET_1_HUB_PORT) 
+    voltageInput0.setHubPort(PHIDGET_HUB_PORT) 
 	
     voltageInput0.setDeviceSerialNumber(PHIDGET_SERIAL_NUMBER)
 
@@ -316,9 +306,9 @@ def maximum(liste):
 AFFICHAGE DES DONNEES
 """
 
-def graph(nom_du_fichier_blanc, nom_du_fichier_echantillon, nom_echantillon): # nom_du_fichier_blanc, nom_du_fichier_echantillon: (str) Chemin d'acces des fichier creer pour l'expérience 
-    data_1 = pd.read_csv(nom_du_fichier_blanc,  encoding='ISO-8859-1')
-    data_2= pd.read_csv(nom_du_fichier_echantillon,  encoding='ISO-8859-1')
+def graph(fichier_blanc, fichier_echantillon, Nom_echantillon): # fichier_blanc, fichier_echantillon: (str) Chemin d'acces des fichier creer pour l'expérience 
+    data_1 = pd.read_csv(fichier_blanc,  encoding='ISO-8859-1')
+    data_2= pd.read_csv(fichier_echantillon,  encoding='ISO-8859-1')
 
 # Obtenir les colonnes 'Longueur d\'onde' et Tension Blanc et Tension echantillon
     Longueur_donde = data_1['Longueur d\'onde (nm)']
@@ -332,7 +322,7 @@ def graph(nom_du_fichier_blanc, nom_du_fichier_echantillon, nom_echantillon): # 
     plt.plot(Longueur_donde, Absorbance)
     plt.xlabel('Longueur d\'onde (nm)')
     plt.ylabel('Absorbance')
-    plt.title('Absorbance du '+ nom_echantillon)
+    plt.title('Absorbance du '+ Nom_echantillon)
 
 # Mise en évidence du point de pic en rouge
     plt.scatter(Pic_longueur_donde, Pic_d_absorbance, color='red')
@@ -353,8 +343,9 @@ def graph(nom_du_fichier_blanc, nom_du_fichier_echantillon, nom_echantillon): # 
     plt.vlines(x=Pic_longueur_donde, ymin=min(Absorbance), ymax=Pic_d_absorbance, linestyle='dashed', color='red')
 # Affichage du graphique
     plt.show()
-# Longueur d'onde d'absorbance
  
+
+# Affichagage mode rapide
 def graph_mode_rapide():
     [x,y]=mode_rapide(4,4)
     plt.plot(x,y)
@@ -365,23 +356,39 @@ def graph_mode_rapide():
 ACQUISITION
 """
 
-def acquisition(course_vis, nombre_de_mesures, vitesse_translation_vis, nom_du_fichier_bruit_de_noir, nom_du_fichier_blanc, nom_du_fichier_echantillon, nom_echantillon): 
+def acquisition(course_vis, nombre_de_mesures, vitesse_translation_vis, PHIDGET_HUB_PORT, fichier_bruit_de_noir, fichier_blanc, fichier_echantillon, Nom_echantillon): 
     mode=input("Choisir le mode d'acquisition (noir) / (blanc) / (echantillon) :")
     if mode=='noir':
-        acquisition_bruit_noir(nom_du_fichier_bruit_de_noir,nombre_de_mesures)
+        acquisition_bruit_noir(PHIDGET_HUB_PORT,fichier_bruit_de_noir,nombre_de_mesures)
     
     elif mode=='blanc':
-        solution(course_vis, nombre_de_mesures, vitesse_translation_vis, nom_du_fichier_blanc, 'Tension blanc (Volt)') 
+        solution(course_vis, nombre_de_mesures, vitesse_translation_vis, fichier_blanc, 'Tension blanc (Volt)') 
     
     elif mode=='echantillon':
-        solution(course_vis, nombre_de_mesures, vitesse_translation_vis, nom_du_fichier_echantillon, 'Tension échantillon (Volt)')
-        time.sleep(0.5) # Laiss
-        graph(nom_du_fichier_blanc, nom_du_fichier_echantillon, nom_echantillon)
+        solution(course_vis, nombre_de_mesures, vitesse_translation_vis, fichier_echantillon, 'Tension échantillon (Volt)')
+        time.sleep(0.5) # Voir si c'est nécessaire 
+        graph(fichier_blanc, fichier_echantillon, Nom_echantillon)
     
     else:
         print("Sélectionner le mode (blanc), (echantillon), (noir)")
 
 
-acquisition(7, 200, 4, CHEMIN_ACCES+LISTE_NOM_FICHIER[0], CHEMIN_ACCES+LISTE_NOM_FICHIER[1],CHEMIN_ACCES+LISTE_NOM_FICHIER[2], NOM_ECHANTILLON) # course_vis 13.75 mm / 260 points / vitesse_translation_vis = 4mm/min
+
+
+course_vis=7 # 7mm
+nombre_de_mesures=200 # A modifier si on veut être plus précis
+vitesse_translation_vis=4 # 4mm/min
+
+Date='31_03_2023' # A modifier à chaque jour de projet
+Chemin_acces='Manip\Manip_' + Date
+Taille_de_fente='\Fente_1mm' # A modifier si on change de fente
+
+fichier_bruit_de_noir= Chemin_acces + Taille_de_fente + '\Tension_de_noir_' + Date + '.cvs'
+fichier_blanc=  Chemin_acces + Taille_de_fente + '\Tension_de_blanc_' + Date + '.cvs'
+fichier_echantillon=  Chemin_acces + Taille_de_fente + '\Tension_de_echantillon_' + Date + '.cvs'
+
+Nom_echantillon='bleu de bromophenol' # A modifier si on change de composé chimique
+
+acquisition(course_vis, nombre_de_mesures, vitesse_translation_vis, PHIDGET_1_HUB_PORT, fichier_bruit_de_noir, fichier_blanc, fichier_echantillon, Nom_echantillon) # course_vis 13.75 mm / 260 points / vitesse_translation_vis = 4mm/min
 
 

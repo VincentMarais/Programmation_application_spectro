@@ -91,8 +91,8 @@ def position_moteur_x():
     #position_x=reponse.split(",")[0]
     #return float(position_x)
 
-def modif_vitesse_translation(vitesse_translation):
-    g_code = '$110=' + str(vitesse_translation) + '\n'
+def modif_vitesse_translation(vitesse_translation_vis):
+    g_code = '$110=' + str(vitesse_translation_vis) + '\n'
     connection.write(g_code.encode())
     time.sleep(0.5)
 
@@ -105,22 +105,22 @@ def deplacement_domaine_visible():
         connection.write(gcode_1.encode())
 
         
-def deplacer_moteur(distance, vitesse_translation): # Fonction qui pilote le moteur      
+def deplacer_moteur(course_vis, vitesse_translation_vis): # Fonction qui pilote le moteur      
         g_code= 'G90'+ '\n'
         connection.write(g_code.encode())
         time.sleep(0.5)
-        modif_vitesse_translation(vitesse_translation)        
-        gcode_1= 'G0X' + str(distance) + '\n'
+        modif_vitesse_translation(vitesse_translation_vis)        
+        gcode_1= 'G0X' + str(course_vis) + '\n'
         connection.write(gcode_1.encode())
 
         
 
-def retour_moteur(pas,vitesse_translation): 
-        modif_vitesse_translation(vitesse_translation)
+def retour_moteur(pas_vis, vitesse_translation_vis): 
+        modif_vitesse_translation(vitesse_translation_vis)
         g_code= 'G91'+ '\n' # Le moteur ce déplace en relatif
         connection.write(g_code.encode())
         time.sleep(0.5)
-        gcode_1= 'G0X-' + str(pas) + '\n' # Le moteur ce déplace linéairement de -pas (retour_moteur en arrière)
+        gcode_1= 'G0X-' + str(pas_vis) + '\n' # Le moteur ce déplace linéairement de -pas_vis (retour_moteur en arrière)
         connection.write(gcode_1.encode())
 
 """
@@ -129,4 +129,8 @@ s=str(etat_mot())
 while 'Idle' not in s:
     s=str(etat_mot())
 """
-deplacer_moteur(-7,10)
+
+course_vis=-7
+vitesse_translation_vis=10
+
+deplacer_moteur(course_vis, vitesse_translation_vis)
