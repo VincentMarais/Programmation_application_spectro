@@ -11,13 +11,13 @@ DEPART_VIS=19.25 # Analyse UV départ de la vis à 19.25mm
 VARIABLES
 """
 
-Fenetre_recherche_pic = 100 # Définir la largeur de la fenêtre de recherche des pics
+Fenetre_recherche_pic = 30 # Définir la largeur de la fenêtre de recherche des pics
 Largeur_fonction_porte = 30 # reglage opti (Fente 0_2mm): 23 / (Fente 0_5mm): 30 / (Fente 1mm): 15 / (Fente 2mm): 30 (# Définir la taille de la fenêtre de lissage)
-Chemin_acces="Manip\Manip_31_03_2023\Fente_2mm\Solution de KOH"
+Chemin_acces="Manip\Manip_31_03_2023\Fente_2mm\Bromophenol_dilue"
 
 # Lire le fichier ODS
-data_solution_blanc = pd.read_csv(Chemin_acces +'\solution_blanc_UV_31_03_2023.csv', encoding='ISO-8859-1')
-data_solution_echantillon= pd.read_csv(Chemin_acces +'\solution_echantillon_UV_31_03_2023.csv', encoding='ISO-8859-1')
+data_solution_blanc = pd.read_csv(Chemin_acces +'\solution_blanc_31_03_2023.csv', encoding='ISO-8859-1')
+data_solution_echantillon= pd.read_csv(Chemin_acces +'\solution_echantillon_31_03_2023.csv', encoding='ISO-8859-1')
 #data_bruit_de_noir=pd.read_csv(Chemin_acces +'\Tension_de_noir_31_03_2023.csv', encoding='ISO-8859-1')
 
 
@@ -63,7 +63,7 @@ Acquisition des données
 Longueur_donde = data_solution_blanc['Longueur d\'onde (nm)']
 Tension_blanc = data_solution_blanc['Tension blanc (Volt)']
 Tension_echantillon= data_solution_echantillon['Tension échantillon (Volt)']
-pas_de_vis=data_solution_blanc['pas']
+#pas_de_vis=data_solution_blanc['pas']
 #Tension_de_noir=data_bruit_de_noir['Tension de noir (Volt)']
 
 """
@@ -79,7 +79,7 @@ Tension_echantillon=correction_bruit_de_noir(Tension_echantillon, Tension_de_noi
 Absorbance=np.log10(np.abs(Tension_blanc)/np.abs(Tension_echantillon))
 
 # Analyse UV départ de la vis à 19.25mm
-pas_de_vis=caracterisation_du_pas_vis(DEPART_VIS)
+#pas_de_vis=caracterisation_du_pas_vis(DEPART_VIS)
 
 
 """
@@ -220,6 +220,6 @@ def Graph_Course_vis_absorbance(nom_espece_chimique):
     # Affichage du graphique
     plt.show()
 
-nom_espece_chimique='KOH'
+nom_espece_chimique='bromophenol dilué'
 graph_Longueur_donde_Absorbance(nom_espece_chimique)
-Graph_Course_vis_absorbance(nom_espece_chimique)
+#Graph_Course_vis_absorbance(nom_espece_chimique)

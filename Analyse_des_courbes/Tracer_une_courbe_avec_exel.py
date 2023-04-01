@@ -33,11 +33,11 @@ def caracterisation_du_pas_vis(depart): # Course de depart de la vis en (mm)
 
 
 # Lire le fichier ODS
-Chemin_acces="Manip\Manip_31_03_2023\Fente_2mm\Solution de KOH"
+Chemin_acces="Manip\Manip_31_03_2023\Fente_2mm\Bromophenol_dilue"
 
 # Lire le fichier ODS
-data_solution_blanc = pd.read_csv(Chemin_acces +'\solution_blanc_UV_31_03_2023.csv', encoding='ISO-8859-1')
-data_solution_echantillon= pd.read_csv(Chemin_acces +'\solution_echantillon_UV_31_03_2023.csv', encoding='ISO-8859-1')
+data_solution_blanc = pd.read_csv(Chemin_acces +'\solution_blanc_31_03_2023.csv', encoding='ISO-8859-1')
+data_solution_echantillon= pd.read_csv(Chemin_acces +'\solution_echantillon_31_03_2023.csv', encoding='ISO-8859-1')
 #data_bruit_de_noir=pd.read_csv(Chemin_acces +'\Tension_de_noir_31_03_2023.csv', encoding='ISO-8859-1')
 
 
@@ -46,15 +46,15 @@ data_solution_echantillon= pd.read_csv(Chemin_acces +'\solution_echantillon_UV_3
 Longueur_donde = data_solution_blanc['Longueur d\'onde (nm)']
 Tension_blanc = data_solution_blanc['Tension blanc (Volt)']
 Tension_echantillon= data_solution_echantillon['Tension échantillon (Volt)']
-pas_de_vis=data_solution_blanc['pas']
+#pas_de_vis=data_solution_blanc['pas']
 #Tension_de_noir=data_bruit_de_noir['Tension de noir (Volt)']
-pas_de_vis=caracterisation_du_pas_vis(DEPART_VIS)
+#pas_de_vis=caracterisation_du_pas_vis(DEPART_VIS)
 Absorbance=np.log10(np.abs(Tension_blanc)/np.abs(Tension_echantillon))
 
 # Maximum d'
 Max_d_absorbance=max(Absorbance)
 longueur_donde_absorbe=Longueur_donde[Indice_maximum((Absorbance))]
-Pas_vis_absorbe=pas_de_vis[Indice_maximum((Absorbance))]
+#Pas_vis_absorbe=pas_de_vis[Indice_maximum((Absorbance))]
 
 def graph_Longueur_donde_Absorbance(nom_espece_chimique):
     # Création du graphique
@@ -129,6 +129,6 @@ def ouvert_fichier_ods():
         print(row)
 
 
-nom_espece_chimique='KOH'
+nom_espece_chimique='bromophenol dilué'
 
-graph_pas_de_vis_Absorbance(nom_espece_chimique)
+graph_Longueur_donde_Absorbance(nom_espece_chimique)
