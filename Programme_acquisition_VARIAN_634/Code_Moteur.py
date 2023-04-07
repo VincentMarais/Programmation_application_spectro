@@ -10,13 +10,15 @@ PHIDGET_HUB_PORT = 0
 PHIDGET_SERIAL_NUMBER = 626587
 INITIALIZATION_TIME = 2
 
-connection = serial.Serial(COM_PORT, BAUD_RATE, timeout=1)
-time.sleep(2)  # Attendre que la connexion s'établisse
+s = serial.Serial(COM_PORT, BAUD_RATE)
+s.write("\r\n\r\n".encode()) # encode pour convertir "\r\n\r\n" 
+time.sleep(INITIALIZATION_TIME)   # Attend initialisation un GRBL
+s.flushInput()  # Vider le tampon d'entrée, en supprimant tout son contenu.
 
 def position_moteur_x():
     # Demande la position actuelle du moteur selon l'axe X
-    connection.write(b"?x\n")
-    reponse = connection.readline().decode().strip()
+    s.write(b"?x\n")
+    reponse = s.readline().decode().strip()
     position_x = reponse.split(":")[1]
     return int(position_x)
 
@@ -24,14 +26,14 @@ def position_moteur_x():
 
 def position_XYZ():
     g_code= "?" + '\n' 
-    connection.write(g_code.encode())
+    s.write(g_code.encode())
     time.sleep(0.1)
 
     # Lire et traiter la réponse
-    response = str(connection.readline())
+    response = str(s.readline())
     print("Réponse brute :", response)
     while 'MPos' not in response:
-        response = str(connection.readline())
+        response = str(s.readline())
     
         # Extraire les coordonnées X, Y, et Z
     match = re.search(r"MPos:([-+]?[0-9]*\.?[0-9]+),([-+]?[0-9]*\.?[0-9]+),([-+]?[0-9]*\.?[0-9]+)", response)
@@ -67,24 +69,24 @@ Caractérisation DU MOTEUR
 
 def etat_mot():
     g_code='?' + '\n'
-    connection.write(g_code.encode())
-    return connection.read(40) # 10: On lit 10 caractère dans le serial
+    s.write(g_code.encode())
+    return s.read(40) # 10: On lit 10 caractère dans le serial
 
 def param_mot():    
     g_code='$G' + '\n'
-    connection.write(g_code.encode())
-    print(connection.read(75))
+    s.write(g_code.encode())
+    print(s.read(75))
 
 
 
 def position_moteur_x():
     # Demande la position actuelle du moteur selon l'axe X
     g_code= "?" + '\n' 
-    connection.write(g_code.encode())
+    s.write(g_code.encode())
     time.sleep(0.1)
-    reponse = str(connection.readline())
+    reponse = str(s.readline())
     while 'MPos' not in reponse:
-        reponse = str(connection.readline())
+        reponse = str(s.readline())
         print(reponse)
     
     #reponse = reponse.split(":")
@@ -93,35 +95,49 @@ def position_moteur_x():
 
 def modif_vitesse_translation(vitesse_translation_vis):
     g_code = '$110=' + str(vitesse_translation_vis) + '\n'
-    connection.write(g_code.encode())
+    s.write(g_code.encode())
     time.sleep(0.5)
 
 
 def deplacement_domaine_visible():
         g_code= 'G90'+ '\n'
-        connection.write(g_code.encode())
+        s.write(g_code.encode())
         time.sleep(0.5)
         gcode_1= 'G0X7.25' + '\n'
-        connection.write(gcode_1.encode())
+        s.write(gcode_1.encode())
 
         
-def deplacer_moteur(course_vis, vitesse_translation_vis): # Fonction qui pilote le moteur      
-        g_code= 'G90'+ '\n'
-        connection.write(g_code.encode())
+def deplacer_moteur_vis(course_vis, vitesse_translation_vis): # Fonction qui pilote le moteur      
+        g_code= 'G91'+ '\n'
+        s.write(g_code.encode())
         time.sleep(0.5)
         modif_vitesse_translation(vitesse_translation_vis)        
         gcode_1= 'G0X' + str(course_vis) + '\n'
-        connection.write(gcode_1.encode())
+        s.write(gcode_1.encode())
+
+def deplacer_moteur_miroir(course_vis): # Fonction qui pilote le moteur      
+        g_code= 'G91'+ '\n'
+        s.write(g_code.encode())
+        time.sleep(0.5)
+        gcode_1= 'G0Y' + str(course_vis) + '\n'
+        s.write(gcode_1.encode())
 
         
 
 def retour_moteur(pas_vis, vitesse_translation_vis): 
         modif_vitesse_translation(vitesse_translation_vis)
         g_code= 'G91'+ '\n' # Le moteur ce déplace en relatif
-        connection.write(g_code.encode())
+        s.write(g_code.encode())
         time.sleep(0.5)
         gcode_1= 'G0X-' + str(pas_vis) + '\n' # Le moteur ce déplace linéairement de -pas_vis (retour_moteur en arrière)
-        connection.write(gcode_1.encode())
+        s.write(gcode_1.encode())
+
+
+def deplacement_double_moteur(course_vis, course_miroir, vitesse_translation_vis):
+     deplacer_moteur_vis(course_vis, vitesse_translation_vis)
+     deplacer_moteur_miroir(course_miroir)
+
+     
 
 """
 deplacer_moteur(-0.754,4)
@@ -130,7 +146,16 @@ while 'Idle' not in s:
     s=str(etat_mot())
 """
 
-course_vis=-7
-vitesse_translation_vis=10
 
-deplacer_moteur(course_vis, vitesse_translation_vis)
+course_vis=-1
+course_miroir=2
+vitesse_translation_vis=4
+
+#deplacement_double_moteur(course_vis, course_miroir, vitesse_translation_vis)
+deplacer_moteur_miroir(course_miroir)
+deplacer_moteur_vis(course_vis,vitesse_translation_vis)
+
+
+
+
+
