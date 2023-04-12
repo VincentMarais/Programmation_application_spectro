@@ -38,7 +38,7 @@ Cette commande va installer toutes les bibliothèques listées dans le fichier r
 
 # Utilisation du programme
 
-1. Branchez le Phidget et le moteur sur l'ordinateur.
+1. Branchez le Phidget et la carte arduino sur l'ordinateur.
 
 2. Allumez le spectrophotomètre Varian 634 et assurez-vous qu'il est correctement connecté à l'ordinateur.
 
