@@ -47,7 +47,7 @@ Cette commande va installer toutes les bibliothèques listées dans le fichier r
 4. Lancez le programme avec la commande suivante :
 
 ``` bash
-python main.py
+python Double_faisceau.py
 ```
 
 5. Suivez les instructions affichées à l'écran pour utiliser le programme.
