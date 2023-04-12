@@ -150,34 +150,29 @@ def mode_precision(course_vis, nombre_de_mesures):  # d: distance parcouru par l
     ch1.setDeviceSerialNumber(PHIDGET_SERIAL_NUMBER)
 	
     while i < course_vis: # Tant que la vis n'a pas parcouru une distance course_vis
+        
         ch0.openWaitForAttachment(TEMPS_ATTENTE_PHIDGET)
         Tension_Phidget_echantillon.append(ch0.getVoltage()) # getVoltage() : (Tension la plus récente du channel Phidget) https://www.phidgets.com/?view=api&product_id=VCP1000_0&lang=Python
         print(Tension_Phidget_echantillon)
-
         deplacer_moteur_miroir(0.33334) # Le moteur doit faire une angle de 60° 
-        ch0.close()
-
-
+        ch0.close() # Voir si je mets le close à la fin du while
 
         ch1.openWaitForAttachment(TEMPS_ATTENTE_PHIDGET)
         Tension_Phidget_blanc.append(ch1.getVoltage())
-
+        print(Tension_Phidget_blanc)
         deplacer_moteur_miroir(-0.33334)
         ch1.close()
-
-        print(Tension_Phidget_blanc)
 
         pas_de_vis.append(i)
         Longueur_d_onde.append(31.10419907*i +400) # Je suppose que l'on part à 400nm -> 0mm et que l'on fini à 800 nm --> 20.8mm => 19.23= coefficient directeur de la droite lambda = a*x + 400 nm où x position de la vis
         
         deplacer_moteur_vis(i+pas) # Le moteur travail en mode absolue par défaut G90 
-        time.sleep(t) # Comme $110 =4mm/min et le pas de vis est de 0.5mm => Le moteur réalise un pas de vis en 7.49s
+        time.sleep(t) # A voir si je le laisse
         i+=pas
 
         print(i)     
         print(Longueur_d_onde)
 
-        ch0.close()
     Tension_Phidget_echantillon.reverse() # On retourne car on commence à 800nm (le rouge) et on termine dans UV 
     return  Longueur_d_onde, pas_de_vis, Tension_Phidget_blanc, Tension_Phidget_echantillon
 

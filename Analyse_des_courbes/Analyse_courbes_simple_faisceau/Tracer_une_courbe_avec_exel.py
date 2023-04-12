@@ -26,7 +26,7 @@ def Indice_maximum(liste):
     return p
 
 # Course de la vis en absolu
-def caracterisation_du_pas_vis(depart): # Course de depart de la vis en (mm)
+def caracterisation_du_pas_vis(depart,pas_de_vis): # Course de depart de la vis en (mm)
     for i in range (len(pas_de_vis)):
         pas_de_vis[i]=pas_de_vis[i]+depart # Où 19.25 Pour l'UV-VIS
     return pas_de_vis
@@ -48,7 +48,7 @@ Tension_blanc = data_solution_blanc['Tension blanc (Volt)']
 Tension_echantillon= data_solution_echantillon['Tension échantillon (Volt)']
 #pas_de_vis=data_solution_blanc['pas']
 #Tension_de_noir=data_bruit_de_noir['Tension de noir (Volt)']
-#pas_de_vis=caracterisation_du_pas_vis(DEPART_VIS)
+#pas_de_vis=caracterisation_du_pas_vis(DEPART_VIS, pas_de_vis)
 Absorbance=np.log10(np.abs(Tension_blanc)/np.abs(Tension_echantillon))
 
 # Maximum d'
