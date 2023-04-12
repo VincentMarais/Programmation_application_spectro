@@ -1,0 +1,7 @@
+pyserial
+Phidget22
+matplotlib
+numpy
+csv
+pandas
+scipy
