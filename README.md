@@ -52,7 +52,7 @@ https://www.phidgets.com/docs/Phidget_Programming_Basics
 4. Lancez le programme avec la commande suivante :
 
 ``` bash
-python Double_faisceau.py
+python App_Spectro.py
 ```
 
 5. Suivez les instructions affichées à l'écran pour utiliser le programme.
