@@ -2,9 +2,8 @@ pyserial
 Phidget22
 matplotlib
 numpy
-python-csv
 pandas
 scipy
 openpyxl
 customtkinter
-PIL
+

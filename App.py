@@ -51,14 +51,14 @@ class App(customtkinter.CTk):
 
         self.title("Application VARIAN 634")
         self.geometry("700x450")
-        self.iconbitmap("Images_App\Polytech_clermond_logo.ico")
+        self.iconbitmap("test_images\Polytech_clermond_logo.ico")
 
         # set grid layout 1x2
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(1, weight=1)
 
         # load images with light and dark mode image
-        image_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Images_App")
+        image_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "test_images")
         self.logo_image = customtkinter.CTkImage(Image.open(os.path.join(image_path, "Polytech_clermond_logo.ico")), size=(30, 30))
         self.large_test_image = customtkinter.CTkImage(Image.open(os.path.join(image_path, "optique_spectro.png")), size=(441, 200))
         self.image_icon_image = customtkinter.CTkImage(Image.open(os.path.join(image_path, "image_icon_light.png")), size=(20, 20))
@@ -395,7 +395,6 @@ class App(customtkinter.CTk):
 if __name__ == "__main__":
     app = App()
     app.mainloop()
-
 
 
 
