@@ -2,7 +2,7 @@ pyserial
 Phidget22
 matplotlib
 numpy
-csv
+python-csv
 pandas
 scipy
 openpyxl
