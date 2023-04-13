@@ -35,6 +35,11 @@ pip install -r requirements.txt
 ```
 Cette commande va installer toutes les bibliothèques listées dans le fichier requirements.txt qui se trouve dans le répertoire du projet. Assurez-vous que ce fichier contient bien toutes les bibliothèques nécessaires au bon fonctionnement du programme.
 
+## Installation Phidget
+
+Pour mettre en fonctionnement le Phidget, veuillez suivre ces instructions :
+
+https://www.phidgets.com/docs/Phidget_Programming_Basics 
 
 # Utilisation du programme
 
