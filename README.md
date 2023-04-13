@@ -25,8 +25,9 @@ https://www.youtube.com/watch?v=PikcUT-ts7E&ab_channel=AhmedHegazy
 3. Placez-vous dans le répertoire du projet.
 
 ``` bash
-cd 
+cd Chemin_acces
 ```
+Exemple si vous avez téléchargé le fichié sur votre bureau: 'cd Desktop\Programmation_application_spectro-master\App_VARIAN'
 
 4. Installez les bibliothèques nécessaires en exécutant la commande suivante :
 
