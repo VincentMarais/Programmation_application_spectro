@@ -131,7 +131,7 @@ def mode_precision(course_vis, nombre_de_mesures, vitesse_translation_vis):  # d
     pas_de_vis=[]
     i=0
     pas=course_vis/nombre_de_mesures # 0.5mm Pas de la vis (cf Exel)
-    t= (pas*60)/vitesse_translation_vis # Temps pour faire un pas 
+    temps_par_pas= (pas*60)/vitesse_translation_vis # Temps pour faire un pas 
     
     g_code= '$110=' + str(vitesse_translation_vis) + '\n'
     s.write(g_code.encode())
@@ -147,7 +147,7 @@ def mode_precision(course_vis, nombre_de_mesures, vitesse_translation_vis):  # d
         pas_de_vis.append(i)
         Longueur_d_onde.append(31.10419907*i +400) # Je suppose que l'on part à 400nm -> 0mm et que l'on fini à 800 nm --> 20.8mm => 19.23= coefficient directeur de la droite lambda = a*x + 400 nm où x position de la vis
         deplacer_vis(i+pas) # Le moteur travail en mode absolue par défaut G90 
-        time.sleep(t) # Comme $110 =4mm/min et le pas de vis est de 0.5mm => Le moteur réalise un pas de vis en 7.49s
+        time.sleep(temps_par_pas) # Comme $110 =4mm/min et le pas de vis est de 0.5mm => Le moteur réalise un pas de vis en 7.49s
         i+=pas
 
         print(i)     

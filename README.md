@@ -20,6 +20,7 @@ pip --version
 ```
 
 Si `pip` n'est pas installé, suivez les étapes de ce tutoriel : 
+
 https://www.youtube.com/watch?v=PikcUT-ts7E&ab_channel=AhmedHegazy 
 
 3. Placez-vous dans le répertoire du projet.
@@ -42,7 +43,7 @@ Cette commande va installer toutes les bibliothèques listées dans le fichier r
 
 Pour mettre en fonctionnement le Phidget, veuillez suivre ces instructions :
 
-https://www.phidgets.com/docs/Phidget_Programming_Basics 
+https://www.phidgets.com/?tier=3&catid=16&pcid=14&prodid=953 
 
 # Utilisation du programme
 

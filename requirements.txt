@@ -7,3 +7,4 @@ scipy
 openpyxl
 customtkinter
 tkinter
+scikit-learn

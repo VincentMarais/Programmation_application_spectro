@@ -3,7 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import ezodf
 import numpy as np
-from scipy.signal import find_peaks
+from scipy.fft import fft, fftfreq, ifft
 
 
 """
@@ -11,6 +11,7 @@ Chemin d'accès
 
 """
 DEPART_VIS=19.25
+nom_espece_chimique='bromophenol dilué'
 
 """
 Utilitaire
@@ -33,11 +34,11 @@ def caracterisation_du_pas_vis(depart,pas_de_vis): # Course de depart de la vis 
 
 
 # Lire le fichier ODS
-Chemin_acces="Manip\Manip_31_03_2023\Fente_2mm\Bromophenol_dilue"
+Chemin_acces="Manip\Manip_24_03_2023\Fente_0_5mm"
 
 # Lire le fichier ODS
-data_solution_blanc = pd.read_csv(Chemin_acces +'\solution_blanc_31_03_2023.csv', encoding='ISO-8859-1')
-data_solution_echantillon= pd.read_csv(Chemin_acces +'\solution_echantillon_31_03_2023.csv', encoding='ISO-8859-1')
+data_solution_blanc = pd.read_csv(Chemin_acces +'\solution_blanc.csv', encoding='ISO-8859-1')
+data_solution_echantillon= pd.read_csv(Chemin_acces +'\solution_echantillon1.csv', encoding='ISO-8859-1')
 #data_bruit_de_noir=pd.read_csv(Chemin_acces +'\Tension_de_noir_31_03_2023.csv', encoding='ISO-8859-1')
 
 
@@ -85,7 +86,7 @@ def graph_Longueur_donde_Absorbance(nom_espece_chimique):
 
 
 
-def graph_pas_de_vis_Absorbance(nom_espece_chimique):
+def graph_pas_de_vis_Absorbance(nom_espece_chimique, pas_de_vis, Pas_vis_absorbe):
     # Création du graphique
     plt.plot(pas_de_vis, Absorbance)
     plt.xlabel('Course de la vis (mm)')
@@ -129,6 +130,7 @@ def ouvert_fichier_ods():
         print(row)
 
 
-nom_espece_chimique='bromophenol dilué'
 
 graph_Longueur_donde_Absorbance(nom_espece_chimique)
+
+
