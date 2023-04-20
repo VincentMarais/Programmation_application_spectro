@@ -14,14 +14,14 @@ VARIABLES
 
 """
 
-Fenetre_recherche_pic = 30 # Définir la largeur de la fenêtre de recherche des pics
+Fenetre_recherche_pic = 100 # Définir la largeur de la fenêtre de recherche des pics
 Largeur_fonction_porte = 30 # reglage opti (Fente 0_2mm): 23 / (Fente 0_5mm): 30 / (Fente 1mm): 15 / (Fente 2mm): 30 (# Définir la taille de la fenêtre de lissage)
-Chemin_acces="Manip\Manip_22_03_2023"
-Manip='Manip_24_03_2023_Fente_1mm'
+Chemin_acces="Manip\Manip_24_03_2023\Fente_0_2mm"
+Manip='Manip_24_03_2023_Fente_0_5mm'
 
 # Lire le fichier ODS
 data_solution_blanc = pd.read_csv(Chemin_acces +'\solution_blanc.csv', encoding='ISO-8859-1')
-data_solution_echantillon= pd.read_csv(Chemin_acces +'\expérience_1_echantillon.csv', encoding='ISO-8859-1')
+data_solution_echantillon= pd.read_csv(Chemin_acces +'\solution_echantillon.csv', encoding='ISO-8859-1')
 #data_bruit_de_noir=pd.read_csv(Chemin_acces +'\Tension_de_noir_31_03_2023.csv', encoding='ISO-8859-1')
 
 
@@ -62,12 +62,12 @@ def correction_absorbance_negative(Tension_blanc, Tension_echantillon):
     return Tension_blanc,Tension_echantillon
 
 
-def zero_absorbance(Absorbance_lisse, Absorbance_spline):
+def zero_absorbance(Absorbance_spline):
     """
     Fonction qui mettre l'absorbance de mon signal lissé à zéro si elle est cencé l'être avec correction absorbance negatif
     """
-    for i in range(len(Absorbance_lisse)):
-        if Absorbance_lisse[i]==0:
+    for i in range(len(Absorbance_spline)):
+        if Absorbance_spline[i] < 0:
             Absorbance_spline[i]=0
     return Absorbance_spline
 
@@ -79,7 +79,7 @@ Acquisition des données
 """
 # Obtenir les colonnes 
 Longueur_donde = data_solution_blanc['Longueur d\'onde (nm)']
-Tension_blanc = data_solution_echantillon['Tension blanc (Volt)']
+Tension_blanc = data_solution_blanc['Tension blanc (Volt)']
 Tension_echantillon= data_solution_echantillon['Tension échantillon (Volt)']
 #pas_de_vis=data_solution_blanc['pas']
 #Tension_de_noir=data_bruit_de_noir['Tension de noir (Volt)']
@@ -130,7 +130,7 @@ Inversement, si la valeur de s est faible, la courbe de spline sera plus proche 
 smoothed_absorbance = spline(Longueur_donde)
 
 
-smoothed_absorbance = zero_absorbance(smoothed_absorbance,smoothed_absorbance)
+smoothed_absorbance = zero_absorbance(smoothed_absorbance)
 
 
 """
