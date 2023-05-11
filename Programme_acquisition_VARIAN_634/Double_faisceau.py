@@ -327,9 +327,9 @@ Date='31_03_2023' # A modifier à chaque jour de projet
 Chemin_acces='Manip\Manip_' + Date
 Taille_de_fente='\Fente_1mm' # A modifier si on change de fente
 
-fichier_bruit_de_noir= Chemin_acces + Taille_de_fente + '\Tension_de_noir_' + Date + '.cvs'
-fichier_blanc=  Chemin_acces + Taille_de_fente + '\Tension_de_blanc_' + Date + '.cvs'
-fichier_echantillon=  Chemin_acces + Taille_de_fente + '\Tension_de_echantillon_' + Date + '.cvs'
+fichier_bruit_de_noir= Chemin_acces + Taille_de_fente + '\Tension_de_noir_' + Date + '.csv'
+fichier_blanc=  Chemin_acces + Taille_de_fente + '\Tension_de_blanc_' + Date + '.csv'
+fichier_echantillon=  Chemin_acces + Taille_de_fente + '\Tension_de_echantillon_' + Date + '.csv'
 
 Nom_echantillon='bleu de bromophenol' # A modifier si on change de composé chimique
 
