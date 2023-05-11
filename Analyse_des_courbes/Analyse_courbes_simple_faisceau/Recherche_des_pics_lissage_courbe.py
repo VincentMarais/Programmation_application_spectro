@@ -15,14 +15,27 @@ VARIABLES
 """
 
 Fenetre_recherche_pic = 100 # Définir la largeur de la fenêtre de recherche des pics
-Largeur_fonction_porte = 30 # reglage opti (Fente 0_2mm): 23 / (Fente 0_5mm): 30 / (Fente 1mm): 15 / (Fente 2mm): 30 (# Définir la taille de la fenêtre de lissage)
-Chemin_acces="Manip\Manip_24_03_2023\Fente_0_2mm"
-Manip='Manip_24_03_2023_Fente_0_5mm'
+Largeur_fonction_porte = 1 # reglage opti (Fente 0_2mm): 23 / (Fente 0_5mm): 30 / (Fente 1mm): 15 / (Fente 2mm): 30 (# Définir la taille de la fenêtre de lissage)
+Chemin_acces="Manip\Manip_22_03_2023"
+Manip='Manip_22_03_2023_Fente_2mm'
 
 # Lire le fichier ODS
 data_solution_blanc = pd.read_csv(Chemin_acces +'\solution_blanc.csv', encoding='ISO-8859-1')
 data_solution_echantillon= pd.read_csv(Chemin_acces +'\solution_echantillon.csv', encoding='ISO-8859-1')
 #data_bruit_de_noir=pd.read_csv(Chemin_acces +'\Tension_de_noir_31_03_2023.csv', encoding='ISO-8859-1')
+
+"""
+
+Lecture des données
+
+"""
+# Obtenir les colonnes 
+Longueur_donde = data_solution_blanc['Longueur d\'onde (nm)']
+Tension_blanc = data_solution_echantillon['Tension blanc (Volt)']
+Tension_echantillon= data_solution_echantillon['Tension échantillon (Volt)']
+#pas_de_vis=data_solution_blanc['pas']
+#Tension_de_noir=data_bruit_de_noir['Tension de noir (Volt)']
+Absorbance=np.log10(np.abs(Tension_blanc)/np.abs(Tension_echantillon))
 
 
 """
@@ -72,18 +85,19 @@ def zero_absorbance(Absorbance_spline):
     return Absorbance_spline
 
 
-"""
-
-Acquisition des données
 
 """
-# Obtenir les colonnes 
-Longueur_donde = data_solution_blanc['Longueur d\'onde (nm)']
-Tension_blanc = data_solution_blanc['Tension blanc (Volt)']
-Tension_echantillon= data_solution_echantillon['Tension échantillon (Volt)']
-#pas_de_vis=data_solution_blanc['pas']
-#Tension_de_noir=data_bruit_de_noir['Tension de noir (Volt)']
-Absorbance=np.log10(np.abs(Tension_blanc)/np.abs(Tension_echantillon))
+Sauvegarde des données
+"""
+def sauvegarder_donnees(nom_fichier, Liste,Liste_2, titre_1, titre_2 ): # nom_Fichier: str / Liste_longueurs_d_onde, Liste_tensions: Liste / titre_1, titre_2: str
+    Liste=np.real(Liste)
+    Liste=Liste.tolist()
+    with open(nom_fichier, 'w', newline='') as fichier_csv:
+        writer = csv.writer(fichier_csv)
+        writer.writerow([titre_1, titre_2])
+        for i in range(len(Liste)):
+            writer.writerow([Liste[i], Liste_2[i]])
+
 
 """
 Correction des données
@@ -93,6 +107,11 @@ Correction des données
 # Correction bruit de noir
 #Tension_blanc=correction_bruit_de_noir(Tension_blanc, Tension_de_noir)
 #Tension_echantillon=correction_bruit_de_noir(Tension_echantillon, Tension_de_noir)
+
+
+
+Nom_fichier_signal= Chemin_acces + '\signal_'+Manip+'.csv'
+sauvegarder_donnees(Nom_fichier_signal,Longueur_donde,Absorbance,'Longueur d\'onde (nm)', 'Absorbance')
 
 #Correction absorbance négatives
 [Tension_blanc,Tension_echantillon]=correction_absorbance_negative(Tension_blanc,Tension_echantillon)
@@ -115,9 +134,14 @@ qui se déplace à travers la série chronologique en prenant les données
 
 """
 # Lissage de la courbe d'Absorbance avec un produit de convolution discret et une fonction porte
-smoothed_absorbance = np.convolve(Absorbance_negatif_corrig, np.ones(Largeur_fonction_porte)/Largeur_fonction_porte, mode='same') # Je fais le produit de convolution de mon signal avec une  fonction porte de taille Largeur_fonction_porte
-    
-spline = UnivariateSpline(Longueur_donde, smoothed_absorbance, s=0.05)
+smoothed_absorbance_convol = np.convolve(Absorbance_negatif_corrig, np.ones(Largeur_fonction_porte)/Largeur_fonction_porte, mode='same') # Je fais le produit de convolution de mon signal avec une  fonction porte de taille Largeur_fonction_porte
+
+Nom_fichier_convol= Chemin_acces + '\signal_convol_'+Manip+'.csv'
+sauvegarder_donnees(Nom_fichier_convol,Longueur_donde,smoothed_absorbance_convol,'Longueur d\'onde (nm)', 'Absorbance')
+
+
+# Interpolation: spline
+spline = UnivariateSpline(Longueur_donde, smoothed_absorbance_convol, s=0.05)
 """
 Lorsque vous ajustez s, vous modifiez la pénalité appliquée aux différences entre les 
 données et la courbe de spline. Plus la valeur de s est grande, plus le lissage 
@@ -127,29 +151,19 @@ Inversement, si la valeur de s est faible, la courbe de spline sera plus proche 
 """
 
 # Prédictions à partir du spline
-smoothed_absorbance = spline(Longueur_donde)
+absorbance_spline = spline(Longueur_donde)
+Nom_fichier_spline= Chemin_acces + '\signal_spline_'+ Manip+'.csv'
+sauvegarder_donnees(Nom_fichier_spline,Longueur_donde,absorbance_spline,'Longueur d\'onde (nm)', 'Absorbance')
 
-
-smoothed_absorbance = zero_absorbance(smoothed_absorbance)
-
+absorbance_lisse = zero_absorbance(absorbance_spline)
+Nom_fichier_signal_lisse= Chemin_acces +'\signal_lisse_'+ Manip+'.csv'
+sauvegarder_donnees(Nom_fichier_signal_lisse,Longueur_donde,absorbance_lisse,'Longueur d\'onde (nm)', 'Absorbance')
 
 """
 Rercherche des pics
 """
 # Recherche des pics d'absorbance
-peaks, _ = find_peaks(smoothed_absorbance, distance=Fenetre_recherche_pic) # La fonction find_peaks de scipy.signal permet de trouver les maxima locaux dans un signal en comparant les valeurs voisines
-
-"""
-Sauvegarde des données
-"""
-def sauvegarder_donnees(nom_fichier, Liste,Liste_2, titre_1, titre_2 ): # nom_Fichier: str / Liste_longueurs_d_onde, Liste_tensions: Liste / titre_1, titre_2: str
-    Liste=np.real(Liste)
-    Liste=Liste.tolist()
-    with open(nom_fichier, 'w', newline='') as fichier_csv:
-        writer = csv.writer(fichier_csv)
-        writer.writerow([titre_1, titre_2])
-        for i in range(len(Liste)):
-            writer.writerow([Liste[i], Liste_2[i]])
+peaks, _ = find_peaks(absorbance_lisse, distance=Fenetre_recherche_pic) # La fonction find_peaks de scipy.signal permet de trouver les maxima locaux dans un signal en comparant les valeurs voisines
 
 
 """
@@ -163,32 +177,32 @@ def graph_Longueur_donde_Absorbance(nom_espece_chimique):
     # Affichage des pics détectés
     print('Les pics d\'absorbance se trouvent aux positions suivantes :')
     for i in peaks:
-        print('{:.2f} nm : {:.2f}'.format(Longueur_donde[i], smoothed_absorbance[i]))
+        print('{:.2f} nm : {:.2f}'.format(Longueur_donde[i], absorbance_lisse[i]))
 
 
     # Calculer le maximum d'absorbance
-    Max_absorbance = smoothed_absorbance.max()
+    Max_absorbance = absorbance_lisse.max()
 
     # Trouver la longueur lié au maximum d'absorbance 
-    s = pd.Series(smoothed_absorbance)
+    s = pd.Series(absorbance_lisse)
     max_index = s.idxmax()
 
-    df = pd.DataFrame({'Longueur_d_onde_(nm)': Longueur_donde[peaks], 'Absorbance': smoothed_absorbance[peaks]})
+    df = pd.DataFrame({'Longueur_d_onde_(nm)': Longueur_donde[peaks], 'Absorbance': absorbance_lisse[peaks]})
     df.to_csv(Chemin_acces +'\peaks_longueur_donde_'+Manip+'.csv', index=False)
 
     longueur_donde_absorbe = Longueur_donde[max_index]
 
-    plt.plot(Longueur_donde, smoothed_absorbance, '--', label='Données lissé')
-    plt.plot(Longueur_donde[peaks], smoothed_absorbance[peaks], 'ro')
+    plt.plot(Longueur_donde, absorbance_lisse, '--', label='Données lissé')
+    plt.plot(Longueur_donde[peaks], absorbance_lisse[peaks], 'ro')
     plt.xlabel('Longueur d\'onde (nm)')
     plt.ylabel('Absorbance (lissée)')
     plt.title('Absorbance du ' + nom_espece_chimique + ' (lissée)')
 
     # Affichage des coordonnées de tout les pics
     for i in peaks:
-        plt.annotate('({:.2f} nm, {:.2f})'.format(Longueur_donde[i], smoothed_absorbance[i]),
-                    xy=(Longueur_donde[i], smoothed_absorbance[i]),
-                    xytext=(Longueur_donde[i] + 10, smoothed_absorbance[i]),
+        plt.annotate('({:.2f} nm, {:.2f})'.format(Longueur_donde[i], absorbance_lisse[i]),
+                    xy=(Longueur_donde[i], absorbance_lisse[i]),
+                    xytext=(Longueur_donde[i] + 10, absorbance_lisse[i]),
                     fontsize=10,
                     color='red',
                     arrowprops=dict(facecolor='red', arrowstyle='->'))
@@ -208,7 +222,7 @@ def graph_Longueur_donde_Absorbance(nom_espece_chimique):
     plt.hlines(y=Max_absorbance, xmin=Longueur_donde[0] , xmax=longueur_donde_absorbe, linestyle='dashed', color='red')
 
     # Ligne pointillée reliant le point de pic à l'axe des y
-    plt.vlines(x=longueur_donde_absorbe, ymin=min(smoothed_absorbance), ymax=Max_absorbance, linestyle='dashed', color='red')
+    plt.vlines(x=longueur_donde_absorbe, ymin=min(absorbance_lisse), ymax=Max_absorbance, linestyle='dashed', color='red')
 
     # Affichage du graphique
     plt.show()
@@ -221,23 +235,23 @@ def Graph_Course_vis_absorbance(nom_espece_chimique,pas_de_vis):
      # Affichage des pics détectés
     print('Les pics d\'absorbance se trouvent aux positions suivantes :')
     for i in peaks:
-        print('{:.2f} mm : {:.2f}'.format(pas_de_vis[i], smoothed_absorbance[i]))
+        print('{:.2f} mm : {:.2f}'.format(pas_de_vis[i], absorbance_lisse[i]))
 
 
     # Calculer le maximum d'absorbance
-    Max_absorbance = smoothed_absorbance.max()
+    Max_absorbance = absorbance_lisse.max()
 
     # Trouver la longueur lié au maximum d'absorbance 
-    s = pd.Series(smoothed_absorbance)
+    s = pd.Series(absorbance_lisse)
     max_index = s.idxmax()
     pas_vis_absorbe = pas_de_vis[max_index]
 
-    df = pd.DataFrame({'Pas (mm)': pas_de_vis[peaks], 'Absorbance': smoothed_absorbance[peaks]})
+    df = pd.DataFrame({'Pas (mm)': pas_de_vis[peaks], 'Absorbance': absorbance_lisse[peaks]})
     df.to_csv(Chemin_acces +'\peaks_pas_vis.csv', index=False)
 
     plt.figure()
     plt.plot(pas_de_vis, Absorbance, '-', label='Données bruitées')
-    plt.plot(pas_de_vis, smoothed_absorbance, '--', label='Données lissé')
+    plt.plot(pas_de_vis, absorbance_lisse, '--', label='Données lissé')
     plt.legend()
     plt.xlabel('Course de la vis (mm)')
     plt.ylabel('Absorbance (lissée)')
@@ -245,9 +259,9 @@ def Graph_Course_vis_absorbance(nom_espece_chimique,pas_de_vis):
 
     # Affichage des coordonnées de tout les pics
     for i in peaks:
-        plt.annotate('({:.2f} mm, {:.2f})'.format(pas_de_vis[i], smoothed_absorbance[i]),
-                    xy=(pas_de_vis[i], smoothed_absorbance[i]),
-                    xytext=(pas_de_vis[i] + 0.5 , smoothed_absorbance[i]),
+        plt.annotate('({:.2f} mm, {:.2f})'.format(pas_de_vis[i], absorbance_lisse[i]),
+                    xy=(pas_de_vis[i], absorbance_lisse[i]),
+                    xytext=(pas_de_vis[i] + 0.5 , absorbance_lisse[i]),
                     fontsize=10,
                     color='red',
                     arrowprops=dict(facecolor='red', arrowstyle='->'))

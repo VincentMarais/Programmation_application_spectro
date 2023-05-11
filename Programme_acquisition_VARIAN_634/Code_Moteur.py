@@ -147,12 +147,12 @@ while 'Idle' not in s:
 """
 
 
-course_vis=-1
+course_vis=-0.5
 course_miroir=2
-vitesse_translation_vis=4
+vitesse_translation_vis=10
 
 #deplacement_double_moteur(course_vis, course_miroir, vitesse_translation_vis)
-deplacer_moteur_miroir(course_miroir)
+#deplacer_moteur_miroir(course_miroir)
 deplacer_moteur_vis(course_vis,vitesse_translation_vis)
 
 

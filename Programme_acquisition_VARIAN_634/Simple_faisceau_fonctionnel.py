@@ -138,14 +138,14 @@ def mode_precision(course_vis, nombre_de_mesures, vitesse_translation_vis):  # d
     time.sleep(0.5)
     
     voltageInput0 = VoltageInput()
-    voltageInput0.setHubPort(PHIDGET_1_HUB_PORT) 
+    voltageInput0.setHubPort(PHIDGET_2_HUB_PORT) 
     voltageInput0.setDeviceSerialNumber(PHIDGET_SERIAL_NUMBER)
 	
     while i < course_vis: # Tant que la vis n'a pas parcouru une distance course_vis
         voltageInput0.openWaitForAttachment(TEMPS_ATTENTE_PHIDGET)
         Tension_Phidget_echantillon.append(voltageInput0.getVoltage()) # getVoltage() : (Tension la plus récente du channel Phidget) https://www.phidgets.com/?view=api&product_id=VCP1000_0&lang=Python
         pas_de_vis.append(i)
-        Longueur_d_onde.append(31.10419907*i +400) # Je suppose que l'on part à 400nm -> 0mm et que l'on fini à 800 nm --> 20.8mm => 19.23= coefficient directeur de la droite lambda = a*x + 400 nm où x position de la vis
+        Longueur_d_onde.append(31.10419907*i +200) # Je suppose que l'on part à 400nm -> 0mm et que l'on fini à 800 nm --> 20.8mm => 19.23= coefficient directeur de la droite lambda = a*x + 400 nm où x position de la vis
         deplacer_vis(i+pas) # Le moteur travail en mode absolue par défaut G90 
         time.sleep(temps_par_pas) # Comme $110 =4mm/min et le pas de vis est de 0.5mm => Le moteur réalise un pas de vis en 7.49s
         i+=pas
@@ -375,17 +375,17 @@ def acquisition(course_vis, nombre_de_mesures, vitesse_translation_vis, PHIDGET_
 
 
 
-course_vis=7 # 7mm
+course_vis=10 # 7mm
 nombre_de_mesures=200 # A modifier si on veut être plus précis
 vitesse_translation_vis=4 # 4mm/min
 
-Date='31_03_2023' # A modifier à chaque jour de projet
+Date='10_05_2023' # A modifier à chaque jour de projet
 Chemin_acces='Manip\Manip_' + Date
-Taille_de_fente='\Fente_1mm' # A modifier si on change de fente
+Taille_de_fente='\Fente_0_2mm' # A modifier si on change de fente
 
-fichier_bruit_de_noir= Chemin_acces + Taille_de_fente + '\Tension_de_noir_' + Date + '.cvs'
-fichier_blanc=  Chemin_acces + Taille_de_fente + '\Tension_de_blanc_' + Date + '.cvs'
-fichier_echantillon=  Chemin_acces + Taille_de_fente + '\Tension_de_echantillon_' + Date + '.cvs'
+fichier_bruit_de_noir= Chemin_acces + Taille_de_fente + '\Tension_de_noir_' + Date + '.csv'
+fichier_blanc=  Chemin_acces + Taille_de_fente + '\Tension_de_blanc_' + Date + '.csv'
+fichier_echantillon=  Chemin_acces + Taille_de_fente + '\Tension_de_echantillon_' + Date + '.csv'
 
 Nom_echantillon='bleu de bromophenol' # A modifier si on change de composé chimique
 

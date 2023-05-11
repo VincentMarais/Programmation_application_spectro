@@ -1,8 +1,13 @@
 from Phidget22.Phidget import *
 from Phidget22.Devices.VoltageInput import *
-import time # bibliothèque temps 
+from Phidget22.Devices.VoltageRatioInput import *
+from Phidget22.PhidgetException import *
+from Phidget22.Phidget import *
+
 import matplotlib.pyplot as plt
 import numpy as np
+import sys
+import time
 
 
 def main_1(Temps_d_acquisition):  # Fonction choisi pour l'app 
@@ -12,16 +17,17 @@ def main_1(Temps_d_acquisition):  # Fonction choisi pour l'app
 
 	voltageInput0 = VoltageInput()
     
-	voltageInput0.setHubPort(0) 
+	voltageInput0.setHubPort(1) 
 	
 	voltageInput0.setDeviceSerialNumber(626587)
-	
+	voltageInput0.openWaitForAttachment(5000)
+
 	start_time = time.time() # Temps initial machine depuis 1er Janvier 1970 en second 
 	while (time.time() - start_time) < Temps_d_acquisition+1: # Tant la durée de simulation n'a pas duré 10s on applique la boucle
 		print(time.time() - start_time)
 		Temps.append(time.time() - start_time)
 		voltageInput0.openWaitForAttachment(5000)
-		Tension_Phidget_echantillon.append(voltageInput0.getVoltage()) # getVoltage() : (Tension la plus récente du channel Phidget) https://www.phidgets.com/?view=api&product_id=VCP1000_0&lang=Python
+		Tension_Phidget_echantillon.append(voltageInput0.MinVoltage()) # getVoltage() : (Tension la plus récente du channel Phidget) https://www.phidgets.com/?view=api&product_id=VCP1000_0&lang=Python
 		print(Tension_Phidget_echantillon)
 		print(len(Tension_Phidget_echantillon))  
 		voltageInput0.close() 
@@ -35,7 +41,7 @@ def Data_Interval():
 	ch.setHubPort(0) 
 		
 	ch.setDeviceSerialNumber(626587)
-	ch.openWaitForAttachment(1000)
+	ch.openWaitForAttachment(5000)
 
 	dataInterval = ch.getDataInterval()
 	print("DataInterval: " + str(dataInterval))
@@ -43,8 +49,46 @@ def Data_Interval():
 	ch.close()
 
 
-Temps_d_acquisition=10
-main_1(Temps_d_acquisition)
+#Temps_d_acquisition=10
+#main_1(Temps_d_acquisition)
+
+
+
+
+
+
+
+
+def onVoltageRatioChange(self, voltageRatio):
+    print("Tension: %f" % voltageRatio)
+
+def main():
+    voltageRatioInput0 = VoltageRatioInput()
+
+    voltageRatioInput0.setOnVoltageRatioChangeHandler(onVoltageRatioChange)
+
+    voltageRatioInput0.setDeviceSerialNumber(626587) # Remplacez XXXXXX par le numéro de série de votre Phidget VCP1000_0
+    voltageRatioInput0.setChannel(1) # Canal du capteur
+    voltageRatioInput0.setIsHubPortDevice(False)
+    voltageRatioInput0.setHubPort(1)
+
+    voltageRatioInput0.openWaitForAttachment(5000)
+
+    try:
+        voltage_min = voltageRatioInput0.getMinVoltageRatio()
+        print("Tension minimale: %f" % voltage_min)
+
+    except PhidgetException as e:
+        print("Erreur: %s" % e.details)
+        print("Exiting....")
+        exit(1)
+
+    print("Appuyez sur Enter pour quitter...")
+    readin = sys.stdin.read(1)
+
+    voltageRatioInput0.close()
+
+main()
 
 """
 La fonction main prend un argument Temps_d_acquisition et effectue les étapes suivantes:
