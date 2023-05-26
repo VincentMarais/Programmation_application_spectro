@@ -7,6 +7,8 @@ import numpy as np
 import csv
 import pandas as pd
 import re
+import os
+
 
  
 """
@@ -386,6 +388,20 @@ Taille_de_fente='\Fente_0_2mm' # A modifier si on change de fente
 fichier_bruit_de_noir= Chemin_acces + Taille_de_fente + '\Tension_de_noir_' + Date + '.csv'
 fichier_blanc=  Chemin_acces + Taille_de_fente + '\Tension_de_blanc_' + Date + '.csv'
 fichier_echantillon=  Chemin_acces + Taille_de_fente + '\Tension_de_echantillon_' + Date + '.csv'
+
+
+utilisateur = "admin"
+projet = "Projet_GP"
+programmation = "Programmation_Spectro/Programmation_application_spectro"
+date = "Manip_11_05_2023"
+fente = "Fente_0_2mm"
+
+# Concaténer les variables pour former le chemin d'accès complet
+chemin = os.path.join("C:/Users", utilisateur, "Documents", projet, programmation, date, fente)
+
+# Créer le répertoire en utilisant le chemin d'accès
+os.makedirs(chemin)
+
 
 Nom_echantillon='bleu de bromophenol' # A modifier si on change de composé chimique
 
