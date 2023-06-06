@@ -1,28 +1,28 @@
+import numpy as np
 import nidaqmx
-from nidaqmx.constants import TerminalConfiguration
+import matplotlib.pyplot as plt
 
-"""
-Programme pour aquérir la tension de la carte NI 6221
+def acquiere_tensions(n):
+    # Création d'un objet de tâche pour la carte NI 6221
+    with nidaqmx.Task() as task:
+        # Configuration de la tâche pour l'acquisition de tension
+        task.ai_channels.add_ai_voltage_chan("Dev1/ai0")  # Remplacez "Dev1/ai0" par le nom de votre canal d'entrée
+        task.timing.cfg_samp_clk_timing(rate=250000, samps_per_chan=32000)
+        
+        # Acquisition des valeurs de tension
+        data = task.read(number_of_samples_per_channel=n)
 
-"""
-with nidaqmx.Task() as task:
-    task.ai_channels.add_ai_voltage_chan("Dev1/ai0", terminal_config=TerminalConfiguration.RSE)
-    
-    # Configure le task pour un échantillonnage continu.
-    task.timing.cfg_samp_clk_timing(1000, sample_mode=nidaqmx.constants.AcquisitionType.CONTINUOUS)
-    
-    try:
-        # Commence l'échantillonnage.
-        task.start()
+    return data
 
-        while True:
-            # Lire la valeur de tension.
-            voltage = task.read()
-            print(f"La tension lue est : {voltage} V")
+# Exemple d'utilisation
+n = 100  # Nombre de valeurs de tension à acquérir
 
-    except KeyboardInterrupt:
-        # Si l'utilisateur appuie sur CTRL+C, arrêtez l'échantillonnage.
-        print("Échantillonnage arrêté par l'utilisateur.")
-    finally:
-        # Assurez-vous que la tâche est bien arrêtée à la fin.
-        task.stop()
+tensions = acquiere_tensions(n)
+print("Valeurs de tension acquises :", tensions)
+
+x=np.linspace(1,n,n)
+plt.plot(x,tensions)
+plt.xlabel('Indice')
+plt.ylabel('Tension')
+plt.show()
+

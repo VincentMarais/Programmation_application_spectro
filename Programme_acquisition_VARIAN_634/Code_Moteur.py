@@ -108,7 +108,7 @@ def deplacement_domaine_visible():
 
         
 def deplacer_moteur_vis(course_vis, vitesse_translation_vis): # Fonction qui pilote le moteur      
-        g_code= 'G91'+ '\n'
+        g_code= 'G90'+ '\n'
         s.write(g_code.encode())
         time.sleep(0.5)
         modif_vitesse_translation(vitesse_translation_vis)        
@@ -147,11 +147,22 @@ while 'Idle' not in s:
 """
 
 
-course_vis=2
+course_vis=7.25
 course_miroir=2
 vitesse_translation_vis=10
 
-deplacement_double_moteur(course_vis, course_miroir, vitesse_translation_vis)
+def acquisition(n):
+    i=0
+    g_code = '$110=' + str(vitesse_translation_vis) + '\n'
+    s.write(g_code.encode())
+    while i<n:
+        gcode_1= 'G0X' + str(i) + '\n' # Le moteur ce déplace linéairement de -pas_vis (retour_moteur en arrière)
+        s.write(gcode_1.encode())
+        time.sleep(2)
+        i=0.05+i
+    retour_moteur(n,10)
+
+acquisition(21)
 #deplacer_moteur_miroir(course_miroir)
 #deplacer_moteur_vis(course_vis,vitesse_translation_vis)
 

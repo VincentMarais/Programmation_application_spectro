@@ -3,7 +3,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import ezodf
 import numpy as np
-from scipy.fft import fft, fftfreq, ifft
 
 
 """

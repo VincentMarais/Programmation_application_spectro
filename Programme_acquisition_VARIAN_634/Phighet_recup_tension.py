@@ -10,7 +10,19 @@ import sys
 import time
 
 
-def main_1(Temps_d_acquisition):  # Fonction choisi pour l'app 
+"""
+Explication: Recup_tension_temps
+
+Entrée: Temps_d_acquisition (réel): temps d'acquisition de la tension par le Phidget
+
+Sortie: 
+	- Temps(liste): Liste qui contient les instant d'acquisition  
+	- Tension_Phidget_echantillon: Liste qui contient les tensions à chaque instant
+"""
+
+def Recup_tension_temps(Temps_d_acquisition):  # Fonction choisi pour l'app 
+        
+		
 	Tension_Phidget_echantillon= []
 
 	Temps=[]
@@ -32,83 +44,19 @@ def main_1(Temps_d_acquisition):  # Fonction choisi pour l'app
 		print(len(Tension_Phidget_echantillon))  
 		voltageInput0.close() 
 	return Temps, Tension_Phidget_echantillon
-	
 
+Recup_tension_temps(10)	# 10 second d'acquisition
+plt.plot(Recup_tension_temps[0],Recup_tension_temps[1])
+plt.xlabel('Temps (second)')
+plt.ylabel('Tension (Volt)')
+plt.show()
 
-def Data_Interval():
-	ch = VoltageInput()
-
-	ch.setHubPort(0) 
-		
-	ch.setDeviceSerialNumber(626587)
-	ch.openWaitForAttachment(5000)
-
-	dataInterval = ch.getDataInterval()
-	print("DataInterval: " + str(dataInterval))
-	
-	ch.close()
 
 
 #Temps_d_acquisition=10
 #main_1(Temps_d_acquisition)
 
 
-
-
-
-
-
-
-def onVoltageRatioChange(self, voltageRatio):
-    print("Tension: %f" % voltageRatio)
-
-def main():
-    voltageRatioInput0 = VoltageRatioInput()
-
-    voltageRatioInput0.setOnVoltageRatioChangeHandler(onVoltageRatioChange)
-
-    voltageRatioInput0.setDeviceSerialNumber(626587) # Remplacez XXXXXX par le numéro de série de votre Phidget VCP1000_0
-    voltageRatioInput0.setChannel(1) # Canal du capteur
-    voltageRatioInput0.setIsHubPortDevice(False)
-    voltageRatioInput0.setHubPort(1)
-
-    voltageRatioInput0.openWaitForAttachment(5000)
-
-    try:
-        voltage_min = voltageRatioInput0.getMinVoltageRatio()
-        print("Tension minimale: %f" % voltage_min)
-
-    except PhidgetException as e:
-        print("Erreur: %s" % e.details)
-        print("Exiting....")
-        exit(1)
-
-    print("Appuyez sur Enter pour quitter...")
-    readin = sys.stdin.read(1)
-
-    voltageRatioInput0.close()
-
-main()
-
-"""
-La fonction main prend un argument Temps_d_acquisition et effectue les étapes suivantes:
-
-1) Crée une instance de la classe VoltageInput et l'assigne à la variable voltageInput0.
-
-2) Appelle la méthode setHubPort sur voltageInput0 et définit le port de l'hub à 0.
-
-3) Appelle la méthode setDeviceSerialNumber sur voltageInput0 et définit le numéro de série à 626587.
-
-4) Exécute une boucle for n fois.
-	1. Dans chaque itération de la boucle, il appelle la méthode setOnVoltageChangeHandler sur voltageInput0 et définit la fonction 
-		de gestionnaire à Recup_voltage.
-
-	2. Appelle la méthode openWaitForAttachment sur voltageInput0 avec un argument de 5000 millisecondes (5 secondes), 
-	   ce qui ouvre une connexion au dispositif d'entrée de tension Phidget et attend qu'il soit attaché.
-
-	3. Appelle la méthode close sur voltageInput0, qui ferme la connexion au dispositif d'entrée de tension Phidget.
-
-"""
 
 
 
