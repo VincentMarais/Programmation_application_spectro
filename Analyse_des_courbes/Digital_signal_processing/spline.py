@@ -3,11 +3,11 @@ import matplotlib.pyplot as plt
 from scipy.interpolate import UnivariateSpline
 import csv
 import pandas as pd
-Chemin_acces="Manip\Manip_24_03_2023\Fente_0_5mm"
+Chemin_acces="Manip\Manip_24_03_2023\Fente_0_2mm"
 
 # Lire le fichier ODS
 data_solution_blanc = pd.read_csv(Chemin_acces +'\solution_blanc.csv', encoding='ISO-8859-1')
-data_solution_echantillon= pd.read_csv(Chemin_acces +'\solution_echantillon1.csv', encoding='ISO-8859-1')
+data_solution_echantillon= pd.read_csv(Chemin_acces +'\solution_echantillon.csv', encoding='ISO-8859-1')
 #data_bruit_de_noir=pd.read_csv(Chemin_acces +'\Tension_de_noir_31_03_2023.csv', encoding='ISO-8859-1')
 
 

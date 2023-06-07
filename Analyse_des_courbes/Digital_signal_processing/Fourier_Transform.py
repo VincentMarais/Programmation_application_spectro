@@ -8,7 +8,7 @@ Chemin_acces="Manip\Manip_24_03_2023\Fente_0_2mm"
 
 # Lire le fichier ODS
 data_solution_blanc = pd.read_csv(Chemin_acces +'\solution_blanc.csv', encoding='ISO-8859-1')
-data_solution_echantillon= pd.read_csv(Chemin_acces +'\solution_echantillon1.csv', encoding='ISO-8859-1')
+data_solution_echantillon= pd.read_csv(Chemin_acces +'\solution_echantillon.csv', encoding='ISO-8859-1')
 #data_bruit_de_noir=pd.read_csv(Chemin_acces +'\Tension_de_noir_31_03_2023.csv', encoding='ISO-8859-1')
 
 
@@ -43,7 +43,7 @@ fourier_transform=np.abs(fourier_transform)
 sauvegarder_donnees(nom_fichier, f, fourier_transform, titre,titre_2)
 Chemin_Latex= Chemin_acces + '\signal_Manip_24_03_2023_Fente_0_2mm.csv'
 sauvegarder_donnees(Chemin_Latex, Longueur_donde, Absorbance, "Longueur_d_onde_(nm)", "Absorbance")
-plt.plot(f,fourier_transform)
+plt.plot(f,fourier_transform, color='red')
 plt.show()
 
 plt.plot(Longueur_donde,Absorbance)

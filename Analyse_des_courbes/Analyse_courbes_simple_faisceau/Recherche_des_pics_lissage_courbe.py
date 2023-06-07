@@ -14,10 +14,10 @@ VARIABLES
 
 """
 
-Fenetre_recherche_pic = 100 # Définir la largeur de la fenêtre de recherche des pics
-Largeur_fonction_porte = 1 # reglage opti (Fente 0_2mm): 23 / (Fente 0_5mm): 30 / (Fente 1mm): 15 / (Fente 2mm): 30 (# Définir la taille de la fenêtre de lissage)
-Chemin_acces="Manip\Manip_22_03_2023"
-Manip='Manip_22_03_2023_Fente_2mm'
+Fenetre_recherche_pic = 25 # Définir la largeur de la fenêtre de recherche des pics (25 pour 0.2mm)
+Largeur_fonction_porte = 23 # reglage opti (Fente 0_2mm): 23 / (Fente 0_5mm): 30 / (Fente 1mm): 15 / (Fente 2mm): 30 (# Définir la taille de la fenêtre de lissage)
+Chemin_acces="Manip\Manip_24_03_2023\Fente_0_2mm"
+Manip='Manip_24_03_2023_Fente_2mm'
 
 # Lire le fichier ODS
 data_solution_blanc = pd.read_csv(Chemin_acces +'\solution_blanc.csv', encoding='ISO-8859-1')
@@ -31,10 +31,11 @@ Lecture des données
 """
 # Obtenir les colonnes 
 Longueur_donde = data_solution_blanc['Longueur d\'onde (nm)']
-Tension_blanc = data_solution_echantillon['Tension blanc (Volt)']
+Tension_blanc = data_solution_blanc['Tension blanc (Volt)']
 Tension_echantillon= data_solution_echantillon['Tension échantillon (Volt)']
 #pas_de_vis=data_solution_blanc['pas']
 #Tension_de_noir=data_bruit_de_noir['Tension de noir (Volt)']
+#pas_de_vis=caracterisation_du_pas_vis(DEPART_VIS, pas_de_vis)
 Absorbance=np.log10(np.abs(Tension_blanc)/np.abs(Tension_echantillon))
 
 
@@ -138,6 +139,17 @@ smoothed_absorbance_convol = np.convolve(Absorbance_negatif_corrig, np.ones(Larg
 
 Nom_fichier_convol= Chemin_acces + '\signal_convol_'+Manip+'.csv'
 sauvegarder_donnees(Nom_fichier_convol,Longueur_donde,smoothed_absorbance_convol,'Longueur d\'onde (nm)', 'Absorbance')
+plt.plot(Longueur_donde, smoothed_absorbance_convol, label='Données lissé')
+plt.xlabel('Longueur d\'onde (nm)')
+plt.ylabel('Absorbance')
+plt.show()
+
+
+fourier_transform = np.fft.fft(smoothed_absorbance_convol,n=4096) # 4096 Pour plus de précision fft (zero padding) cf https://www.youtube.com/watch?v=LAswxBR513M&t=582s&ab_channel=VincentChoqueuse
+f=10*np.arange(4096)/4096  # 10: Fréquence d'échantillonage Phidget 
+fourier_transform=np.abs(fourier_transform) 
+plt.plot(f,fourier_transform, color='red')
+plt.show()
 
 
 # Interpolation: spline
@@ -158,6 +170,12 @@ sauvegarder_donnees(Nom_fichier_spline,Longueur_donde,absorbance_spline,'Longueu
 absorbance_lisse = zero_absorbance(absorbance_spline)
 Nom_fichier_signal_lisse= Chemin_acces +'\signal_lisse_'+ Manip+'.csv'
 sauvegarder_donnees(Nom_fichier_signal_lisse,Longueur_donde,absorbance_lisse,'Longueur d\'onde (nm)', 'Absorbance')
+plt.plot(Longueur_donde, absorbance_lisse, label='Données lissé')
+plt.xlabel('Longueur d\'onde (nm)')
+plt.ylabel('Absorbance')
+plt.show()
+
+
 
 """
 Rercherche des pics
@@ -192,7 +210,7 @@ def graph_Longueur_donde_Absorbance(nom_espece_chimique):
 
     longueur_donde_absorbe = Longueur_donde[max_index]
 
-    plt.plot(Longueur_donde, absorbance_lisse, '--', label='Données lissé')
+    plt.plot(Longueur_donde, absorbance_lisse, label='Données lissé')
     plt.plot(Longueur_donde[peaks], absorbance_lisse[peaks], 'ro')
     plt.xlabel('Longueur d\'onde (nm)')
     plt.ylabel('Absorbance (lissée)')

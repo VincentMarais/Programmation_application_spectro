@@ -21,16 +21,12 @@ Sortie:
 """
 
 def Recup_tension_temps(Temps_d_acquisition):  # Fonction choisi pour l'app 
-        
-		
-	Tension_Phidget_echantillon= []
-
-	Temps=[]
-
-	voltageInput0 = VoltageInput()
     
+	Tension_Phidget_echantillon= []
+	Temps=[]
+    
+	voltageInput0 = VoltageInput() 
 	voltageInput0.setHubPort(1) 
-	
 	voltageInput0.setDeviceSerialNumber(626587)
 	voltageInput0.openWaitForAttachment(5000)
 
@@ -44,6 +40,9 @@ def Recup_tension_temps(Temps_d_acquisition):  # Fonction choisi pour l'app
 		print(len(Tension_Phidget_echantillon))  
 		voltageInput0.close() 
 	return Temps, Tension_Phidget_echantillon
+
+
+
 
 Recup_tension_temps(10)	# 10 second d'acquisition
 plt.plot(Recup_tension_temps[0],Recup_tension_temps[1])
