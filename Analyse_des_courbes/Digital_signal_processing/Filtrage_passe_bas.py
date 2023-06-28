@@ -4,11 +4,11 @@ import matplotlib.pyplot as plt
 from scipy.signal import find_peaks, hilbert
 
 # Lire le fichier ODS
-Chemin_acces="Manip\Manip_24_03_2023\Fente_0_5mm"
+Chemin_acces="Manip\Manip_24_03_2023\Fente_0_2mm"
 
 # Lire le fichier ODS
 data_solution_blanc = pd.read_csv(Chemin_acces +'\solution_blanc.csv', encoding='ISO-8859-1')
-data_solution_echantillon= pd.read_csv(Chemin_acces +'\solution_echantillon.csv', encoding='ISO-8859-1')
+data_solution_echantillon= pd.read_csv(Chemin_acces +'\solution_echantillon1.csv', encoding='ISO-8859-1')
 #data_bruit_de_noir=pd.read_csv(Chemin_acces +'\Tension_de_noir_31_03_2023.csv', encoding='ISO-8859-1')
 
 
@@ -27,8 +27,6 @@ def correction_absorbance_negative(Tension_blanc, Tension_echantillon):
     return Tension_blanc,Tension_echantillon
 
 
-Tension_blanc=correction_absorbance_negative(Tension_blanc,Tension_echantillon)[0]
-Tension_echantillon=correction_absorbance_negative(Tension_blanc,Tension_echantillon)[1]
 
 Absorbance=np.log10(np.abs(Tension_blanc)/np.abs(Tension_echantillon))
 
@@ -48,26 +46,23 @@ def low_pass_filter(fourier_transform, cutoff_frequency, sampling_rate):
     return filtered_fourier_transform
 
 
-sampling_rate = 10  # Fréquence d'échantillonnage en Hz
+sampling_rate = 800  # Fréquence d'échantillonnage en Hz
 
 # Calculer la transformée de Fourier du signal
-
-fourier_transform = np.fft.fft(Tension_blanc)
-fourier_transform_1=np.abs(fourier_transform) 
-
-plt.plot(fourier_transform_1)
+fourier_transform = np.fft.fft(Absorbance)
+plt.plot(fourier_transform)
 plt.show()
 # Appliquer le filtre passe-bas
-cutoff_frequency = 0.2  # Fréquence de coupure en Hz
+cutoff_frequency = 40  # Fréquence de coupure en Hz
 filtered_fourier_transform = low_pass_filter(fourier_transform, cutoff_frequency, sampling_rate)
 plt.plot(filtered_fourier_transform)
 plt.show()
 # Calculer le signal filtré
-Tension_blanc_filtre = np.fft.ifft(filtered_fourier_transform)
-Tension_blanc_filtre=np.real(Tension_blanc_filtre)
+Absorbance_filtre = np.fft.ifft(filtered_fourier_transform)
+Absorbance_filtre=np.real(Absorbance_filtre)
 
 
 plt.figure(figsize=(12, 6))
-plt.plot(Longueur_donde, Tension_blanc, label='Signal original')
-plt.plot(Longueur_donde, Tension_blanc_filtre, label="Enveloppe lissée", linestyle='--', color='red')
+plt.plot(Longueur_donde, Absorbance, label='Signal original')
+plt.plot(Longueur_donde, Absorbance_filtre, label="Enveloppe lissée", linestyle='--', color='red')
 plt.show()

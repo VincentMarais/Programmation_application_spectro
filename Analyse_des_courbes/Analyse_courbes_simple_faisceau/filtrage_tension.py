@@ -16,8 +16,8 @@ VARIABLES
 
 Fenetre_recherche_pic = 25 # Définir la largeur de la fenêtre de recherche des pics (25 pour 0.2mm)
 Largeur_fonction_porte = 35 # reglage opti (Fente 0_2mm): 23 / (Fente 0_5mm): 30 / (Fente 1mm): 15 / (Fente 2mm): 30 (# Définir la taille de la fenêtre de lissage)
-Chemin_acces="Manip\Manip_24_03_2023\Fente_1mm"
-Manip='Manip_24_03_2023_Fente_1mm'
+Chemin_acces="Manip\Manip_24_03_2023\Fente_0_2mm"
+Manip='Manip_24_03_2023_Fente_0_2mm'
 
 # Lire le fichier ODS
 data_solution_blanc = pd.read_csv(Chemin_acces +'\solution_blanc.csv', encoding='ISO-8859-1')

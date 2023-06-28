@@ -3,6 +3,13 @@ from nidaqmx.constants import AcquisitionType, Edge
 from nidaqmx.stream_readers import AnalogMultiChannelReader
 from nidaqmx.stream_writers import DigitalSingleChannelWriter
 import numpy as np
+import matplotlib.pyplot as plt
+
+SAMPLES_PER_CHANNEL = 30000
+SAMPLE_RATE = 250000
+CHANNELS = ['Dev1/ai0']  # Remplacez ceci par le nom de votre canal
+NUM_ACQUISITIONS = 30  # Remplacez ceci par le nombre d'acquisitions que vous souhaitez effectuer
+input_range = 0.2  # Gamme de tension en Volts
 
 def min_voltage_measure(n):
     # Configuration des paramètres
@@ -49,3 +56,13 @@ def min_voltage_measure(n):
             min_voltages[i] = np.min(data)
 
     return min_voltages
+
+moyenne=np.mean(min_voltage_measure(NUM_ACQUISITIONS))
+print(min_voltage_measure(NUM_ACQUISITIONS))
+print(moyenne)
+x=np.linspace(1,NUM_ACQUISITIONS,NUM_ACQUISITIONS)
+plt.plot(x,min_voltage_measure(NUM_ACQUISITIONS))
+plt.xlabel('Indice')
+plt.ylabel('Tension')
+plt.show()
+print(moyenne)
