@@ -15,9 +15,9 @@ VARIABLES
 """
 
 Fenetre_recherche_pic = 25 # Définir la largeur de la fenêtre de recherche des pics (25 pour 0.2mm)
-Largeur_fonction_porte = 30 # reglage opti (Fente 0_2mm): 23 / (Fente 0_5mm): 30 / (Fente 1mm): 15 / (Fente 2mm): 30 (# Définir la taille de la fenêtre de lissage)
-Chemin_acces="Manip\Manip_24_03_2023\Fente_0_5mm"
-Manip='Manip_24_03_2023_Fente_0_5mm'
+Largeur_fonction_porte = 35 # reglage opti (Fente 0_2mm): 23 / (Fente 0_5mm): 30 / (Fente 1mm): 15 / (Fente 2mm): 30 (# Définir la taille de la fenêtre de lissage)
+Chemin_acces="Manip\Manip_24_03_2023\Fente_1mm"
+Manip='Manip_24_03_2023_Fente_1mm'
 
 # Lire le fichier ODS
 data_solution_blanc = pd.read_csv(Chemin_acces +'\solution_blanc.csv', encoding='ISO-8859-1')
@@ -120,7 +120,6 @@ sauvegarder_donnees(Nom_fichier_signal,Longueur_donde,Absorbance,'Longueur d\'on
 
 
 # Calcul de l'absorbance
-Absorbance_negatif_corrig=np.log10(np.abs(Tension_blanc)/np.abs(Tension_echantillon))
 
 # Analyse UV départ de la vis à 19.25mm
 #pas_de_vis=caracterisation_du_pas_vis(DEPART_VIS)
@@ -136,18 +135,29 @@ qui se déplace à travers la série chronologique en prenant les données
 
 """
 # Lissage de la courbe d'Absorbance avec un produit de convolution discret et une fonction porte
-smoothed_absorbance_convol = np.convolve(Absorbance_negatif_corrig, np.ones(Largeur_fonction_porte)/Largeur_fonction_porte, mode='same') # Je fais le produit de convolution de mon signal avec une  fonction porte de taille Largeur_fonction_porte
-
-Nom_fichier_convol= Chemin_acces + '\signal_convol_'+Manip+'.csv'
-sauvegarder_donnees(Nom_fichier_convol,Longueur_donde,smoothed_absorbance_convol,'Longueur d\'onde (nm)', 'Absorbance')
-plt.plot(Longueur_donde, smoothed_absorbance_convol, label='Données lissé')
+plt.plot(Longueur_donde,Tension_blanc, color='red')
 plt.xlabel('Longueur d\'onde (nm)')
-plt.ylabel('Absorbance')
+plt.ylabel('Tension blanc')
 plt.show()
 
-print(np.shape(smoothed_absorbance_convol))
 
-fourier_transform = np.fft.fft(smoothed_absorbance_convol,n=4096) # 4096 Pour plus de précision fft (zero padding) cf https://www.youtube.com/watch?v=LAswxBR513M&t=582s&ab_channel=VincentChoqueuse
+fourier_transform = np.fft.fft(Tension_blanc,n=4096) # 4096 Pour plus de précision fft (zero padding) cf https://www.youtube.com/watch?v=LAswxBR513M&t=582s&ab_channel=VincentChoqueuse
+f=10*np.arange(4096)/4096  # 10: Fréquence d'échantillonage Phidget 
+fourier_transform=np.abs(fourier_transform) 
+plt.plot(f,fourier_transform, color='red')
+plt.xlabel('Fréquence (Hz)')
+plt.ylabel('Module de la transformée de Fourier')
+plt.show()
+
+Tension_blanc_conlu = np.convolve(Tension_blanc, np.ones(Largeur_fonction_porte)/Largeur_fonction_porte, mode='same') # Je fais le produit de convolution de mon signal avec une  fonction porte de taille Largeur_fonction_porte
+Tension_echantillon_conlu = np.convolve(Tension_echantillon, np.ones(Largeur_fonction_porte)/Largeur_fonction_porte, mode='same') # Je fais le produit de convolution de mon signal avec une  fonction porte de taille Largeur_fonction_porte
+
+plt.plot(Longueur_donde,Tension_echantillon_conlu, color='red')
+plt.xlabel('Longueur d\'onde (nm)')
+plt.ylabel('Tension blanc')
+plt.show()
+
+fourier_transform = np.fft.fft(Tension_echantillon_conlu,n=4096) # 4096 Pour plus de précision fft (zero padding) cf https://www.youtube.com/watch?v=LAswxBR513M&t=582s&ab_channel=VincentChoqueuse
 f=10*np.arange(4096)/4096  # 10: Fréquence d'échantillonage Phidget 
 fourier_transform=np.abs(fourier_transform) 
 plt.plot(f,fourier_transform, color='red')
@@ -156,46 +166,38 @@ plt.ylabel('Module de la transformée de Fourier')
 plt.show()
 
 
-# Interpolation: spline
-spline = UnivariateSpline(Longueur_donde, smoothed_absorbance_convol, s=0.05)
-"""
-Lorsque vous ajustez s, vous modifiez la pénalité appliquée aux différences entre les 
-données et la courbe de spline. Plus la valeur de s est grande, plus le lissage 
-est important, ce qui donne une courbe de spline plus douce et moins sensible au bruit des données. 
-Inversement, si la valeur de s est faible, la courbe de spline sera plus proche des données bruitées, avec moins de lissage
+Absorbance=np.log10(np.abs(Tension_blanc_conlu)/np.abs(Tension_echantillon_conlu))
 
-"""
-
-# Prédictions à partir du spline
-absorbance_spline = spline(Longueur_donde)
-Nom_fichier_spline= Chemin_acces + '\signal_spline_'+ Manip+'.csv'
-sauvegarder_donnees(Nom_fichier_spline,Longueur_donde,absorbance_spline,'Longueur d\'onde (nm)', 'Absorbance')
-plt.plot(Longueur_donde, absorbance_spline, label='Données lissé')
+plt.plot(Longueur_donde,Absorbance, color='red')
 plt.xlabel('Longueur d\'onde (nm)')
 plt.ylabel('Absorbance')
 plt.show()
-absorbance_lisse = zero_absorbance(absorbance_spline)
-Nom_fichier_signal_lisse= Chemin_acces +'\signal_lisse_'+ Manip+'.csv'
-sauvegarder_donnees(Nom_fichier_signal_lisse,Longueur_donde,absorbance_lisse,'Longueur d\'onde (nm)', 'Absorbance')
+
+
+absorbance_lisse=zero_absorbance(Absorbance)
+plt.plot(Longueur_donde,Absorbance, color='red')
+plt.xlabel('Longueur d\'onde (nm)')
+plt.ylabel('Absorbance')
+plt.show()
+
+spline = UnivariateSpline(Longueur_donde, absorbance_lisse, s=0.05)
+absorbance_lisse = spline(Longueur_donde)
 plt.plot(Longueur_donde, absorbance_lisse, label='Données lissé')
 plt.xlabel('Longueur d\'onde (nm)')
 plt.ylabel('Absorbance')
 plt.show()
 
+peaks, _ = find_peaks(absorbance_lisse, distance=Fenetre_recherche_pic) # La fonction find_peaks de scipy.signal permet de trouver les maxima locaux dans un signal en comparant les valeurs voisines
 
 """
 Rercherche des pics
 """
 # Recherche des pics d'absorbance
-peaks, _ = find_peaks(absorbance_lisse, distance=Fenetre_recherche_pic) # La fonction find_peaks de scipy.signal permet de trouver les maxima locaux dans un signal en comparant les valeurs voisines
 
 
 """
 AFFICHAGE DES DONNNEES
 """
-
-
-
 def graph_Longueur_donde_Absorbance(nom_espece_chimique):   
 
     # Affichage des pics détectés
@@ -254,69 +256,9 @@ def graph_Longueur_donde_Absorbance(nom_espece_chimique):
 
 
 
-def Graph_Course_vis_absorbance(nom_espece_chimique,pas_de_vis):
-
-     # Affichage des pics détectés
-    print('Les pics d\'absorbance se trouvent aux positions suivantes :')
-    for i in peaks:
-        print('{:.2f} mm : {:.2f}'.format(pas_de_vis[i], absorbance_lisse[i]))
-
-
-    # Calculer le maximum d'absorbance
-    Max_absorbance = absorbance_lisse.max()
-
-    # Trouver la longueur lié au maximum d'absorbance 
-    s = pd.Series(absorbance_lisse)
-    max_index = s.idxmax()
-    pas_vis_absorbe = pas_de_vis[max_index]
-
-    df = pd.DataFrame({'Pas (mm)': pas_de_vis[peaks], 'Absorbance': absorbance_lisse[peaks]})
-    df.to_csv(Chemin_acces +'\peaks_pas_vis.csv', index=False)
-
-    plt.figure()
-    plt.plot(pas_de_vis, Absorbance, '-', label='Données bruitées')
-    plt.plot(pas_de_vis, absorbance_lisse, '--', label='Données lissé')
-    plt.legend()
-    plt.xlabel('Course de la vis (mm)')
-    plt.ylabel('Absorbance (lissée)')
-    plt.title('Absorbance du ' + nom_espece_chimique + ' (lissée)')
-
-    # Affichage des coordonnées de tout les pics
-    for i in peaks:
-        plt.annotate('({:.2f} mm, {:.2f})'.format(pas_de_vis[i], absorbance_lisse[i]),
-                    xy=(pas_de_vis[i], absorbance_lisse[i]),
-                    xytext=(pas_de_vis[i] + 0.5 , absorbance_lisse[i]),
-                    fontsize=10,
-                    color='red',
-                    arrowprops=dict(facecolor='red', arrowstyle='->'))
-
-
-    
-    # Affichage du maximum d'absorbance 
-    plt.annotate('({:.2f} mm, {:.2f})'.format(pas_vis_absorbe, Max_absorbance),
-                xy=(pas_vis_absorbe , Max_absorbance),
-                xytext=(pas_vis_absorbe + 0.5 , Max_absorbance),
-                fontsize=10,
-                color='red',
-                arrowprops=dict(facecolor='red', arrowstyle='->'))
-
-
-    # Ligne pointillée reliant le point de pic à l'axe des x
-    plt.hlines(y=Max_absorbance, xmin=pas_de_vis[0] , xmax=pas_vis_absorbe, linestyle='dashed', color='red')
-
-    # Ligne pointillée reliant le point de pic à l'axe des y
-    plt.vlines(x=pas_vis_absorbe, ymin=min(Absorbance), ymax=Max_absorbance, linestyle='dashed', color='red')
-
-    # Affichage du graphique
-    plt.show()
 
 nom_espece_chimique='bromophenol dilué'
 graph_Longueur_donde_Absorbance(nom_espece_chimique)
-#Graph_Course_vis_absorbance(nom_espece_chimique)
-
-
-
-
 
 
 

@@ -33,7 +33,7 @@ def caracterisation_du_pas_vis(depart,pas_de_vis): # Course de depart de la vis 
 
 
 # Lire le fichier ODS
-Chemin_acces="Manip\Manip_24_03_2023\Fente_0_5mm"
+Chemin_acces="Manip\Manip_22_03_2023"
 
 # Lire le fichier ODS
 data_solution_blanc = pd.read_csv(Chemin_acces +'\solution_blanc.csv', encoding='ISO-8859-1')
@@ -44,7 +44,7 @@ data_solution_echantillon= pd.read_csv(Chemin_acces +'\solution_echantillon.csv'
 
 # Obtenir les colonnes 
 Longueur_donde = data_solution_blanc['Longueur d\'onde (nm)']
-Tension_blanc = data_solution_blanc['Tension blanc (Volt)']
+Tension_blanc = data_solution_echantillon['Tension blanc (Volt)']
 Tension_echantillon= data_solution_echantillon['Tension échantillon (Volt)']
 #pas_de_vis=data_solution_blanc['pas']
 #Tension_de_noir=data_bruit_de_noir['Tension de noir (Volt)']
@@ -64,7 +64,7 @@ def graph_Longueur_donde_Absorbance(nom_espece_chimique):
     plt.title('Absorbance du '+ nom_espece_chimique)
 
     # Mise en évidence du point de pic en rouge
-    plt.scatter(longueur_donde_absorbe, Max_d_absorbance, color='red')
+    #plt.scatter(longueur_donde_absorbe, Max_d_absorbance, color='red')
 
 
     # Annotation des coordonnées du point
@@ -85,6 +85,8 @@ def graph_Longueur_donde_Absorbance(nom_espece_chimique):
 
 
 
+
+
 def graph_pas_de_vis_Absorbance(nom_espece_chimique, pas_de_vis, Pas_vis_absorbe):
     # Création du graphique
     plt.plot(pas_de_vis, Absorbance)
@@ -93,7 +95,7 @@ def graph_pas_de_vis_Absorbance(nom_espece_chimique, pas_de_vis, Pas_vis_absorbe
     plt.title('Absorbance du '+ nom_espece_chimique)
 
     # Mise en évidence du point de pic en rouge
-    plt.scatter(Pas_vis_absorbe, Max_d_absorbance, color='red')
+    #plt.scatter(Pas_vis_absorbe, Max_d_absorbance, color='red')
 
 
     # Annotation des coordonnées du point

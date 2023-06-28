@@ -1,7 +1,7 @@
 import serial  
 import numpy as np
 import nidaqmx
-
+from nidaqmx.constants import AcquisitionType, TerminalConfiguration
 import time # bibliothèque temps 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -15,14 +15,19 @@ import os
 """
 INITIALISATION DE L'ARDUINO + PHIDGET
 """
-# Constantes
+# Constantes Arduino
 COM_PORT = 'COM5'
 BAUD_RATE = 115200
-PHIDGET_1_HUB_PORT = 0
-PHIDGET_2_HUB_PORT = 1
-PHIDGET_SERIAL_NUMBER = 626587
+# Constantes Carte NI-6221
+# Configurations lorsque le signal de commande de la lampe au xénon est réglé à 20Hz : SAMPLES_PER_CHANNEL=30000 / SAMPLE_RATE=250000
+
 INITIALIZATION_TIME = 2
 TEMPS_ATTENTE_PHIDGET=5000
+SAMPLES_PER_CHANNEL = 30000
+SAMPLE_RATE = 250000
+CHANNELS = ['Dev1/ai0']  # Remplacez ceci par le nom de votre canal
+NUM_ACQUISITIONS = 10  # Remplacez ceci par le nombre d'acquisitions que vous souhaitez effectuer
+INPUT_RANGE = 0.2  # Gamme de tension en Volts
 
 
 # Initialisation arduino
@@ -94,17 +99,25 @@ def modif_vitesse_translation_vis(vitesse_translation):
 PROGRAMME CARTE NI 6221
 """
 
-def acquiere_tensions(n):
-    # Création d'un objet de tâche pour la carte NI 6221
+def acquiere_tensions():
     with nidaqmx.Task() as task:
-        # Configuration de la tâche pour l'acquisition de tension
-        task.ai_channels.add_ai_voltage_chan("Dev1/ai0")  # Remplacez "Dev1/ai0" par le nom de votre canal d'entrée
-        task.timing.cfg_samp_clk_timing(rate=250000, samps_per_chan=32000)
+        # Configurer la tâche
+        for channel in CHANNELS:
+            task.ai_channels.add_ai_voltage_chan(channel, terminal_config=TerminalConfiguration.DIFF)
         
-        # Acquisition des valeurs de tension
-        data = task.read(number_of_samples_per_channel=n)
+        task.timing.cfg_samp_clk_timing(SAMPLE_RATE, samps_per_chan=SAMPLES_PER_CHANNEL,
+                                        sample_mode=AcquisitionType.FINITE, min_val=-INPUT_RANGE, max_val=INPUT_RANGE)
+        for _ in range(NUM_ACQUISITIONS):
+            # Acquisition des données
+            data = task.read(number_of_samples_per_channel=SAMPLES_PER_CHANNEL)
+            
+            # Conversion des données en un tableau numpy pour faciliter les calculs
+            np_data = np.array(data)
+            
+            # Trouver et stocker le minimum
+            min_voltage = np.min(np_data)
 
-    return data
+    return min_voltage
 
 
 """
@@ -114,21 +127,22 @@ LIEN MOTEUR ET CARTE NI 6221
 
 
 def mode_precision(course_vis, nombre_de_mesures, vitesse_translation_vis):  # d: distance parcouru par la vis en mm/  n: nombre de mesure de tension / vitesse_translation_vis: vitesse_translation_vis translation de la vis (mm/min)
-    Tension_Phidget_echantillon= []
+    Tension_CARTE_NI= []
     Longueur_d_onde=[]
     pas_de_vis=[]
     i=0
-    nombre_de_point=3000
     pas=course_vis/nombre_de_mesures # 0.5mm Pas de la vis (cf Exel)
     temps_par_pas= (pas*60)/vitesse_translation_vis # Temps pour faire un pas 
     Temps_acquisition_carte=1
+    #Initialisation du moteur (vitesse de rotation)
     g_code= '$110=' + str(vitesse_translation_vis) + '\n'
     s.write(g_code.encode())
     time.sleep(0.5)
+    
     while i < course_vis: # Tant que la vis n'a pas parcouru une distance course_vis
-        Tension=np.min(acquiere_tensions(nombre_de_point))
-        Tension_Phidget_echantillon.append(Tension) # getVoltage() : (Tension la plus récente du channel Phidget) https://www.phidgets.com/?view=api&product_id=VCP1000_0&lang=Python
+        Tension_CARTE_NI.append(acquiere_tensions()) # getVoltage() : (Tension la plus récente du channel Phidget) https://www.phidgets.com/?view=api&product_id=VCP1000_0&lang=Python
         pas_de_vis.append(i)
+        
         Longueur_d_onde.append(31.10419907*i +200) # Je suppose que l'on part à 400nm -> 0mm et que l'on fini à 800 nm --> 20.8mm => 19.23= coefficient directeur de la droite lambda = a*x + 400 nm où x position de la vis
         deplacer_vis(i+pas) # Le moteur travail en mode absolue par défaut G90 
         time.sleep(Temps_acquisition_carte) # Comme $110 =4mm/min et le pas de vis est de 0.5mm => Le moteur réalise un pas de vis en 7.49s
@@ -136,12 +150,12 @@ def mode_precision(course_vis, nombre_de_mesures, vitesse_translation_vis):  # d
 
         print(i)     
         print(Longueur_d_onde)
-        print(Tension_Phidget_echantillon)
+        print(Tension_CARTE_NI)
         print(len(Longueur_d_onde))
-        print(len(Tension_Phidget_echantillon))
+        print(len(Tension_CARTE_NI))
 
-    Tension_Phidget_echantillon.reverse() # On retourne car on commence à 800nm (le rouge) et on termine dans UV 
-    return  Longueur_d_onde, Tension_Phidget_echantillon, pas_de_vis
+    Tension_CARTE_NI.reverse() # On retourne car on commence à 800nm (le rouge) et on termine dans UV 
+    return  Longueur_d_onde, Tension_CARTE_NI, pas_de_vis
 
 
 
@@ -276,6 +290,6 @@ os.makedirs(chemin)
 
 Nom_echantillon='bleu de bromophenol' # A modifier si on change de composé chimique
 
-acquisition(course_vis, nombre_de_mesures, vitesse_translation_vis, PHIDGET_1_HUB_PORT, fichier_bruit_de_noir, fichier_blanc, fichier_echantillon, Nom_echantillon) # course_vis 13.75 mm / 260 points / vitesse_translation_vis = 4mm/min
+acquisition(course_vis, nombre_de_mesures, vitesse_translation_vis, fichier_blanc, fichier_echantillon, Nom_echantillon) # course_vis 13.75 mm / 260 points / vitesse_translation_vis = 4mm/min
 
 

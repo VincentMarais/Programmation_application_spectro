@@ -34,19 +34,26 @@ def sauvegarder_donnees(nom_fichier, Liste,Liste_2, titre_1, titre_2 ): # nom_Fi
 
 
 # Calculer la transformée de Fourier du signal
-fourier_transform = np.fft.fft(Absorbance,n=4096) # 4096 Pour plus de précision fft (zero padding) cf https://www.youtube.com/watch?v=LAswxBR513M&t=582s&ab_channel=VincentChoqueuse
+fourier_transform = np.fft.fft(Tension_echantillon, n=4096) # 4096 Pour plus de précision fft (zero padding) cf https://www.youtube.com/watch?v=LAswxBR513M&t=582s&ab_channel=VincentChoqueuse
 f=10*np.arange(4096)/4096  # 10: Fréquence d'échantillonage Phidget 
 nom_fichier=Chemin_acces+'\Transforme_de_fourier_Manip_24_03_2023_Fente_0_2mm.csv'
 titre_2='Transforme_de_fourier'
 titre='Frequence_(Hz)'
 fourier_transform=np.abs(fourier_transform) 
+"""
 sauvegarder_donnees(nom_fichier, f, fourier_transform, titre,titre_2)
 Chemin_Latex= Chemin_acces + '\signal_Manip_24_03_2023_Fente_0_2mm.csv'
 sauvegarder_donnees(Chemin_Latex, Longueur_donde, Absorbance, "Longueur_d_onde_(nm)", "Absorbance")
+"""
 plt.plot(f,fourier_transform, color='red')
-plt.show()
+plt.xlabel('Fréquence (Hz)')
+plt.ylabel('Module de la transformée de Fourier')
+plt.xlim([0,5])
 
-plt.plot(Longueur_donde,Absorbance)
+plt.show()
+plt.plot(Longueur_donde,Tension_blanc)
+plt.xlabel('Longueur d\'onde (nm)')
+plt.ylabel('Absorbance')
 plt.show()
 # Comparer les signaux original et filtré (par exemple, en les traçant)
 
