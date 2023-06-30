@@ -16,8 +16,8 @@ VARIABLES
 
 Fenetre_recherche_pic = 25 # Définir la largeur de la fenêtre de recherche des pics (25 pour 0.2mm)
 Largeur_fonction_porte = 35 # reglage opti (Fente 0_2mm): 23 / (Fente 0_5mm): 30 / (Fente 1mm): 15 / (Fente 2mm): 30 (# Définir la taille de la fenêtre de lissage)
-Taille_de_fente='Fente_0_2nm' # A modifier si on change de fente
-Date='28_06_2023' # A modifier à chaque jour de projet
+Taille_de_fente='Fente_2nm' # A modifier si on change de fente
+Date='30_06_2023' # A modifier à chaque jour de projet
 projet = "Projet_GP_Spectro"
 
 nom_espece_chimique='Bromophenol'
@@ -212,10 +212,10 @@ plt.show()
  ECHANTILLON
 """
 
-Titre="Tension_solution_blanc_photodiode_Lampe_XENON"
+Titre="Tension_solution_echantillon_photodiode_Lampe_XENON"
 plt.plot(Longueur_donde,Tension_echantillon, color='red')
 plt.xlabel('Longueur d\'onde (nm)')
-plt.ylabel('Tension blanc')
+plt.ylabel('Tension echantillon')
 plt.savefig(chemin + "\\" + Titre+".pdf")
 
 plt.show()
@@ -234,16 +234,16 @@ plt.show()
 
 Tension_echantillon_conlu = np.convolve(Tension_echantillon, np.ones(Largeur_fonction_porte)/Largeur_fonction_porte, mode='same') # Je fais le produit de convolution de mon signal avec une  fonction porte de taille Largeur_fonction_porte
 
-Titre="Tension_solution_blanc_convolue_photodiode_Lampe_XENON"
+Titre="Tension_solution_echantillon_convolue_photodiode_Lampe_XENON"
 plt.plot(Longueur_donde,Tension_echantillon_conlu, color='red')
 plt.xlabel('Longueur d\'onde (nm)')
-plt.ylabel('Tension blanc (Volt)')
+plt.ylabel('Tension echantillon (Volt)')
 plt.savefig(chemin + "\\" + Titre+".pdf")
 
 plt.show()
 
 
-Titre="Transformée_de_Fourier_solution_blanc_convolue_photodiode_Lampe_XENON"
+Titre="Transformée_de_Fourier_solution_echantillon_convolue_photodiode_Lampe_XENON"
 fourier_transform = np.fft.fft(Tension_echantillon_conlu,n=4096) # 4096 Pour plus de précision fft (zero padding) cf https://www.youtube.com/watch?v=LAswxBR513M&t=582s&ab_channel=VincentChoqueuse
 f=10*np.arange(4096)/4096  # 10: Fréquence d'échantillonage Phidget 
 fourier_transform=np.abs(fourier_transform) 

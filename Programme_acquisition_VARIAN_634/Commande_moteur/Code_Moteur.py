@@ -135,7 +135,16 @@ def deplacement_double_moteur(course_vis, course_miroir, vitesse_translation_vis
      deplacer_moteur_vis(course_vis, vitesse_translation_vis)
      deplacer_moteur_miroir(course_miroir)
 
-     
+def test_double_faisceau(course_vis,pas , course_miroir, vitesse_translation_vis):
+    i=0
+    while i < course_vis:
+        i+=pas
+        deplacer_moteur_vis(i, vitesse_translation_vis)
+        deplacer_moteur_miroir(course_miroir)
+        #deplacer_moteur_miroir(-course_miroir)
+
+        
+    retour_moteur(course_vis, vitesse_translation_vis)
 
 """
 deplacer_moteur(-0.754,4)
@@ -147,9 +156,9 @@ while 'Idle' not in s:
 #18.73mm
 # 18.73 -5.4= 13.33
 course_vis=5.4
-course_miroir=2
+course_miroir=1.0004
 vitesse_translation_vis=10
-
+pas=0.5
 def acquisition(n):
     i=0
     g_code = '$110=' + str(vitesse_translation_vis) + '\n'
@@ -163,9 +172,9 @@ def acquisition(n):
 
 #acquisition(13.33)
 #deplacer_moteur_miroir(course_miroir)
-deplacer_moteur_vis(course_vis,vitesse_translation_vis)
+#deplacer_moteur_vis(course_vis,vitesse_translation_vis)
 
 
 
-
+test_double_faisceau(course_vis, pas, course_miroir, vitesse_translation_vis)
 

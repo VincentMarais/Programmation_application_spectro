@@ -1,31 +1,41 @@
-import serial
-import time 
-COM_PORT = 'COM3'
-BAUD_RATE = 115200
-INITIALIZATION_TIME = 2
+from pyfirmata import Arduino, util
+import time
 
-s = serial.Serial(COM_PORT, BAUD_RATE)
+# remplacer 'COM3' par le port série correct de votre Arduino
+board = Arduino('COM8')
 
-def get_pin_state(pin):
-    s.write('M119\r\n'.encode())  # Envoie la commande M119 pour obtenir l'état des broches
-    while True:
-        response = s.readline().decode().strip()
-        if response.startswith('Endstop'):
-            if 'X+:' in response:
-                state = response.split('X+:')[-1].strip()
-                if state == 'HIGH':
-                    return True
-                elif state == 'LOW':
-                    return False
+        # utiliser l'itérateur seulement pour les entrées analogiques (non nécessaire ici)
+it = util.Iterator(board)
+it.start()
+pin = board.get_pin('d:3:i')  # d pour digital, 3 pour le pin 3, i pour input
+
+def fourche_optique_etat():
+        # définir le pin 3 comme entrée
+
+
+    # une boucle pour lire l'état du pin
+    state = pin.read()  # lire l'état du pin
+            
+    if state is not None:
+            if state:
+                        return 'Bonne photodiode'
             else:
-                return None  # Broche X+ non trouvée dans la réponse
-
-
-pin_state = get_pin_state('X+')
-if pin_state is not None:
-    if pin_state:
-        print("La fourche optique est en état HIGH.")
+                        return 'Mauvaise photodiode'
     else:
-        print("La fourche optique est en état LOW.")
-else:
-    print("La broche X+ n'a pas été trouvée dans la réponse.")
+        return 'Le pin n\'est pas reconnu.'
+    
+
+
+a='0'
+while a!='Bonne photodiode':
+    L=[]
+    j= 0
+    while j < 4 :
+        a=fourche_optique_etat()
+        L.append(a)
+        j=len(L)
+        print(L)
+    print("Mauvaise photodiode")
+    
+
+print(fourche_optique_etat())

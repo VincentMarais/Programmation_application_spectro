@@ -10,7 +10,7 @@ import csv
 import pandas as pd
 import re
 import os
-
+from pyfirmata import Arduino, util
 
  
 """
@@ -28,8 +28,8 @@ CHANNELS = ['Dev1/ai0', 'Dev1/ai1']
 NUM_ACQUISITIONS = 20  # Remplacez ceci par le nombre d'acquisitions que vous souhaitez effectuer
 
 
-Date='28_06_2023' # A modifier à chaque jour de projet
-Taille_de_fente='Fente_0_2nm' # A modifier si on change de fente
+Date='30_06_2023' # A modifier à chaque jour de projet
+Taille_de_fente='Fente_2nm' # A modifier si on change de fente
 
 
 # Initialisation arduino
@@ -90,6 +90,9 @@ def position_XYZ_vis():
 
 
 def deplacer_vis(pas): # Fonction qui pilote le moteur      
+        g_code= 'G90'+ '\n' # Le moteur ce déplace en relatif
+        s.write(g_code.encode())
+        time.sleep(0.5)
         gcode_1= 'G0X' + str(pas) + '\n'
         s.write(gcode_1.encode())
         
@@ -111,36 +114,108 @@ def modif_vitesse_translation_vis(vitesse_translation):
     s.write(g_code.encode())
     time.sleep(0.5)
 
+
+
+def deplacer_moteur_miroir(course_miroir): # Fonction qui pilote le moteur            
+        g_code= 'G91'+ '\n' # Le moteur ce déplace en relatif
+        s.write(g_code.encode())
+        time.sleep(0.5)
+        gcode_1= 'G0Y' + str(course_miroir) + '\n'
+        s.write(gcode_1.encode())
+
+
+
+"""
+FOURCHE OPTIQUE
+
+"""
+
+# remplacer '' par le port série correct de votre Arduino pour la fourche optique
+board = Arduino('COM8')
+
+        # utiliser l'itérateur seulement pour les entrées analogiques (non nécessaire ici)
+it = util.Iterator(board)
+it.start()
+pin = board.get_pin('d:3:i')  # d pour digital, 3 pour le pin 3, i pour input
+
+def fourche_optique_etat():
+        # définir le pin 3 comme entrée
+
+
+    # une boucle pour lire l'état du pin
+    state = pin.read()  # lire l'état du pin
+            
+    if state is not None:
+            if state:
+                        return 'Bonne photodiode'
+            else:
+                        return 'Mauvaise photodiode'
+    else:
+        return 'Le pin n\'est pas reconnu.'
+    
 """
 PROGRAMME CARTE NI 6221
 """
-def acquisition_tension(Frequence_creneau, Rapport_cyclique):
+
+def acquisition_tension(Frequence_creneau, Rapport_cyclique, Channel):
     min_tensions = []
-    with nidaqmx.Task() as task_impulsion , nidaqmx.Task() as task_voltage :
-        task_impulsion.co_channels.add_co_pulse_chan_freq('/Dev1/ctr0', freq=Frequence_creneau[0], duty_cycle=Rapport_cyclique[0], initial_delay=0.0) # freq 1D numy et duty_cycle 1D numpy cf docs
-        task_impulsion.timing.cfg_implicit_timing(sample_mode=AcquisitionType.CONTINUOUS)
 
-        print(f"Génération du train d'impulsions avec une fréquence de {Frequence_creneau[0]} Hz et un rapport cyclique de {Rapport_cyclique[0]}")
-        task_impulsion.start()
-
-            # Ici, vous pouvez insérer une pause ou attendre un certain événement avant de passer à la génération suivante
-        task_voltage.ai_channels.add_ai_voltage_chan(CHANNELS[0], terminal_config=TerminalConfiguration.DIFF)
+    if Channel=='ai0': # Acquisition sur le 1er capteur
         
-        task_voltage.timing.cfg_samp_clk_timing(SAMPLE_RATE, samps_per_chan=SAMPLES_PER_CHANNEL, sample_mode=AcquisitionType.FINITE)
-        frequence = int(Frequence_creneau)
-        for _ in range(frequence):
-            # Acquisition des données
-                data = task_voltage.read(number_of_samples_per_channel=SAMPLES_PER_CHANNEL)
-            # Conversion des données en un tableau numpy pour faciliter les calculs
-                np_data = np.array(data)
+        with nidaqmx.Task() as task_impulsion , nidaqmx.Task() as task_voltage :
+            task_impulsion.co_channels.add_co_pulse_chan_freq('/Dev1/ctr0', freq=Frequence_creneau[0], duty_cycle=Rapport_cyclique[0], initial_delay=0.0) # freq 1D numy et duty_cycle 1D numpy cf docs
+            task_impulsion.timing.cfg_implicit_timing(sample_mode=AcquisitionType.CONTINUOUS)
+
+            print(f"Génération du train d'impulsions avec une fréquence de {Frequence_creneau[0]} Hz et un rapport cyclique de {Rapport_cyclique[0]}")
+            task_impulsion.start()
+
+                # Ici, vous pouvez insérer une pause ou attendre un certain événement avant de passer à la génération suivante
+            task_voltage.ai_channels.add_ai_voltage_chan(CHANNELS[0], terminal_config=TerminalConfiguration.DIFF)
             
-            # Trouver et stocker le minimum
-                min_voltage = np.min(np_data)
-                min_tensions.append(min_voltage)
-        task_impulsion.stop()
-        task_voltage.stop()
-        moyenne=np.mean(min_tensions)
-    return moyenne
+            task_voltage.timing.cfg_samp_clk_timing(SAMPLE_RATE, samps_per_chan=SAMPLES_PER_CHANNEL, sample_mode=AcquisitionType.FINITE)
+            frequence = int(Frequence_creneau)
+            for _ in range(frequence):
+                # Acquisition des données
+                    data = task_voltage.read(number_of_samples_per_channel=SAMPLES_PER_CHANNEL)
+                # Conversion des données en un tableau numpy pour faciliter les calculs
+                    np_data = np.array(data)
+                
+                # Trouver et stocker le minimum
+                    min_voltage = np.min(np_data)
+                    min_tensions.append(min_voltage)
+            task_impulsion.stop()
+            task_voltage.stop()
+            moyenne=np.mean(min_tensions)
+        return moyenne
+
+
+    elif  Channel=='ai1': # Acquisition sur le 2eme capteur
+        with nidaqmx.Task() as task_impulsion , nidaqmx.Task() as task_voltage :
+            task_impulsion.co_channels.add_co_pulse_chan_freq('/Dev1/ctr0', freq=Frequence_creneau[0], duty_cycle=Rapport_cyclique[0], initial_delay=0.0) # freq 1D numy et duty_cycle 1D numpy cf docs
+            task_impulsion.timing.cfg_implicit_timing(sample_mode=AcquisitionType.CONTINUOUS)
+
+            print(f"Génération du train d'impulsions avec une fréquence de {Frequence_creneau[0]} Hz et un rapport cyclique de {Rapport_cyclique[0]}")
+            task_impulsion.start()
+
+                # Ici, vous pouvez insérer une pause ou attendre un certain événement avant de passer à la génération suivante
+            task_voltage.ai_channels.add_ai_voltage_chan(CHANNELS[1], terminal_config=TerminalConfiguration.DIFF)
+            
+            task_voltage.timing.cfg_samp_clk_timing(SAMPLE_RATE, samps_per_chan=SAMPLES_PER_CHANNEL, sample_mode=AcquisitionType.FINITE)
+            frequence = int(Frequence_creneau)
+            for _ in range(frequence):
+                # Acquisition des données
+                    data = task_voltage.read(number_of_samples_per_channel=SAMPLES_PER_CHANNEL)
+                # Conversion des données en un tableau numpy pour faciliter les calculs
+                    np_data = np.array(data)
+                
+                # Trouver et stocker le minimum
+                    min_voltage = np.min(np_data)
+                    min_tensions.append(min_voltage)
+            task_impulsion.stop()
+            task_voltage.stop()
+            moyenne=np.mean(min_tensions)
+        return moyenne
+
 
 """
 LIEN MOTEUR ET CARTE NI PCI 6221
@@ -149,36 +224,87 @@ LIEN MOTEUR ET CARTE NI PCI 6221
 
 
 def mode_precision(course_vis, nombre_de_mesures, vitesse_translation_vis, Frequence_creneau, Rapport_cyclique):  # d: distance parcouru par la vis en mm/  n: nombre de mesure de tension / vitesse_translation_vis: vitesse_translation_vis translation de la vis (mm/min)
-    Tensions= []
+    """
+    Entrée :
+
+    Sortie : 
+    
+    """
+    
+    Tensions_capteur_1= []
+    Tensions_capteur_2= []
+
     Longueur_d_onde=[]
     pas_de_vis=[]
     i=0
     pas=course_vis/nombre_de_mesures # 0.5mm Pas de la vis (cf Exel)
     temps_par_pas= (pas*60)/vitesse_translation_vis # Temps pour faire un pas 
+
+    
+    """
+    Initialisation moteur    
+    """
+    a=fourche_optique_etat()
+    print(a)
+    if a!='Bonne photodiode':
+        while a!='Bonne photodiode':
+            a=fourche_optique_etat()
+            if a=='Mauvaise photodiode':
+                print("TOURNE 0.4 car :", a)                  
+                deplacer_moteur_miroir(0.4) # Le moteur doit faire une angle de 60°                 
+                time.sleep(1)
+                a=fourche_optique_etat()
+                print("TOURNE -0.4 car :", a)
+                deplacer_moteur_miroir(-0.4) # Le moteur doit faire une angle de 60° 
+
+            else:
+                print(a)
+
+        else: 
+            print(a)
+    g_code= 'G90'+ '\n' # Le moteur ce déplace en relatif
+    s.write(g_code.encode())
+    time.sleep(0.5)
+
     g_code= '$110=' + str(vitesse_translation_vis) + '\n'
     s.write(g_code.encode())
     time.sleep(0.5)
     while i < course_vis: # Tant que la vis n'a pas parcouru une distance course_vis
-        Tension=np.min(acquisition_tension(Frequence_creneau, Rapport_cyclique))
-        Tensions.append(Tension) # 
+
+        Tension_capteur_1=acquisition_tension(Frequence_creneau, Rapport_cyclique, 'ai0' )
+        Tensions_capteur_1.append(Tension_capteur_1) # 
+        print("Tension photodiode 1 (Volt) :", Tensions_capteur_1)
+        print("Taille de la liste Tension photodiode 1 :", len(Tensions_capteur_1))
+
+        deplacer_moteur_miroir(0.33334) # Le moteur doit faire une angle de 60° 
+        time.sleep(0.5)
+        Tension_capteur_2=acquisition_tension(Frequence_creneau, Rapport_cyclique, 'ai1' )
+        Tensions_capteur_2.append(Tension_capteur_2) # 
+        print("Tension photodiode 2 (Volt) :",Tensions_capteur_2)
+        print("Taille de la liste photodiode 2 :", len(Tensions_capteur_2))
+
+        deplacer_moteur_miroir(-0.33334) # Le moteur doit faire une angle de 60° 
+        time.sleep(0.5)
+
         pas_de_vis.append(i)
         Longueur_d_onde.append(-31.10419907*i +800) # Je suppose que l'on part à 400nm -> 5.4mm et que l'on fini à 800 nm --> 18.73nm
+        
         deplacer_vis(i+pas) # Le moteur travail en mode absolue par défaut G90 
         
-        print(i)     
-        print(Longueur_d_onde)
-        print(Tensions)
-        print(len(Longueur_d_onde))
-        print(len(Tensions))
+        print("Pas de vis (mm) :", i)     
+        print("Longueur d\'onde (nm) :", Longueur_d_onde)
+        print("Taille de la liste Longueur d\'onde (nm) :", len(Longueur_d_onde))
         
         time.sleep(temps_par_pas) # Comme $110 =4mm/min et le pas de vis est de 0.5mm => Le moteur réalise un pas de vis en 7.49s
         i+=pas
 
         
 
-    Tensions.reverse() # On retourne car on commence à 800nm (le rouge) et on termine dans UV 
+    Tensions_capteur_1.reverse() # On retourne car on commence à 800nm (le rouge) et on termine dans UV 
+    Tensions_capteur_2.reverse() # On retourne car on commence à 800nm (le rouge) et on termine dans UV 
+
     Longueur_d_onde.reverse()
-    return  Longueur_d_onde, Tensions, pas_de_vis
+    return  Longueur_d_onde, Tensions_capteur_1, Tensions_capteur_2, pas_de_vis
 
 
 
@@ -197,19 +323,6 @@ def sauvegarder_donnees(nom_fichier, Liste_longueurs_d_onde, Liste_tensions, Lis
 
 
 
-def solution(course_vis, nombre_de_mesure, vitesse_translation, Frequence_creneau, Rapport_cyclique, fichier_echantillon, nom_colonne_tension): # Départ 7.25mm / 21 - 7.25 = 13.75mm où 21 course de la vis total de la vis => course_vis=13.75mm
-    [Longueur_d_onde, Tension_echantillon, pas_de_vis] = mode_precision(course_vis, nombre_de_mesure, vitesse_translation, Frequence_creneau, Rapport_cyclique)
-    sauvegarder_donnees(fichier_echantillon, Longueur_d_onde, Tension_echantillon, pas_de_vis, 'Longueur d\'onde (nm)', nom_colonne_tension,'Liste_pas_vis')
-    s=str(etat_mot())
-    while 'Idle' not in s: # 'Idle': Instruction GRBL pour dire ce que moteur est à l'arrêt / 'Run' le moteur tourne
-        s=str(etat_mot())
-
-    print(s)
-
-    param_mot()
-    retour_vis(course_vis)
-    param_mot()
-
 
 def maximum(liste):
     maxi = liste[0]
@@ -227,7 +340,7 @@ def maximum(liste):
 AFFICHAGE DES DONNEES
 """
 
-def graph(fichier_blanc, fichier_echantillon, Nom_echantillon, Titre): # fichier_blanc, fichier_echantillon: (str) Chemin d'acces des fichier creer pour l'expérience 
+def graph(fichier_blanc, fichier_echantillon, Nom_echantillon, Titre, chemin): # fichier_blanc, fichier_echantillon: (str) Chemin d'acces des fichier creer pour l'expérience 
     data_1 = pd.read_csv(fichier_blanc,  encoding='ISO-8859-1')
     data_2= pd.read_csv(fichier_echantillon,  encoding='ISO-8859-1')
 
@@ -263,7 +376,7 @@ def graph(fichier_blanc, fichier_echantillon, Nom_echantillon, Titre): # fichier
 # Ligne pointillée reliant le point de pic à l'axe des y
     plt.vlines(x=Pic_longueur_donde, ymin=min(Absorbance), ymax=Pic_d_absorbance, linestyle='dashed', color='red')
 # Affichage du graphique
-    plt.savefig("C:\\Users\\vimarais\\Documents\\Projet_GP_Spectro\\27_06_2023\\Fente_2mm\\"+Titre+".pdf")
+    plt.savefig(chemin +'\\'+ Titre+".pdf")
 
     plt.show()
 
@@ -272,18 +385,30 @@ def graph(fichier_blanc, fichier_echantillon, Nom_echantillon, Titre): # fichier
 ACQUISITION
 """
 
-def acquisition(course_vis, nombre_de_mesures, vitesse_translation_vis, Frequence_creneau, Rapport_cyclique, fichier_blanc, fichier_echantillon, Nom_echantillon, Titre): 
-    mode=input("Choisir le mode d'acquisition (noir) / (blanc) / (echantillon) : ")
-    if mode=='blanc':
-        solution(course_vis, nombre_de_mesures, vitesse_translation_vis, Frequence_creneau, Rapport_cyclique, fichier_blanc, 'Tension blanc (Volt)') 
+def solutions(course_vis, nombre_de_mesure, vitesse_translation_vis, Frequence_creneau, Rapport_cyclique, fichier_blanc, fichier_echantillon, Nom_echantillon, Titre, chemin): # Départ 7.25mm / 21 - 7.25 = 13.75mm où 21 course de la vis total de la vis => course_vis=13.75mm
+    nom_colonne_tension_blanc='Tension blanc (Volt)'
+
+    nom_colonne_tension_echantillon='Tension échantillon (Volt)'
+
+
+    [Longueur_d_onde, Tension_blanc, Tension_echantillon, pas_de_vis] = mode_precision(course_vis, nombre_de_mesure, vitesse_translation_vis, Frequence_creneau, Rapport_cyclique)
     
-    elif mode=='echantillon':
-        solution(course_vis, nombre_de_mesures, vitesse_translation_vis, Frequence_creneau, Rapport_cyclique, fichier_echantillon, 'Tension échantillon (Volt)')
-        time.sleep(0.5) # Voir si c'est nécessaire 
-        
+    sauvegarder_donnees(fichier_echantillon, Longueur_d_onde, Tension_echantillon, pas_de_vis, 'Longueur d\'onde (nm)', nom_colonne_tension_echantillon,'Liste_pas_vis')
+    sauvegarder_donnees(fichier_blanc, Longueur_d_onde, Tension_blanc, pas_de_vis, 'Longueur d\'onde (nm)', nom_colonne_tension_blanc,'Liste_pas_vis')
+
+    s=str(etat_mot())
+    while 'Idle' not in s: # 'Idle': Instruction GRBL pour dire ce que moteur est à l'arrêt / 'Run' le moteur tourne
+        s=str(etat_mot())
+
+    print(s)
     
-    else:
-        print("Sélectionner le mode (blanc), (echantillon), (noir)")
+    param_mot()
+    retour_vis(course_vis)
+    param_mot()
+
+    graph(fichier_blanc, fichier_echantillon, Nom_echantillon, Titre, chemin)
+
+
 
 
 
@@ -305,7 +430,7 @@ else:
 
 course_vis=13.33 # 7mm
 nombre_de_mesures=200 # A modifier si on veut être plus précis
-vitesse_translation_vis=4 # 4mm/min
+vitesse_translation_vis=10 # 4mm/min
 
 
 
@@ -316,9 +441,10 @@ projet = "Projet_GP_Spectro"
 programmation = "Programmation_Spectro/Programmation_application_spectro"
 
 Nom_echantillon='bleu de bromophenol' # A modifier si on change de composé chimique
-Titre=Date+"_"+ Taille_de_fente  +"_"+ Nom_echantillon
+Titre="Absorbance_"+ "_" + Nom_echantillon+ Date+"_"+ Taille_de_fente  
 
-acquisition(course_vis, nombre_de_mesures, vitesse_translation_vis, np.array([Frequence_creneau]), np.array([Rapport_cyclique]), fichier_blanc, fichier_echantillon, Nom_echantillon, Titre) # course_vis 13.75 mm / 260 points / vitesse_translation_vis = 4mm/min
-
+solutions(course_vis, nombre_de_mesures, vitesse_translation_vis, np.array([Frequence_creneau]), np.array([Rapport_cyclique]), fichier_blanc, fichier_echantillon, Nom_echantillon, Titre, chemin) # course_vis 13.75 mm / 260 points / vitesse_translation_vis = 4mm/min
+#graph(fichier_blanc, fichier_echantillon, Nom_echantillon, Titre, chemin)
 
 #mode_precision(course_vis, nombre_de_mesures, vitesse_translation_vis, Frequence_creneau=np.array([Frequence_creneau]), Rapport_cyclique=np.array([Rapport_cyclique]))
+
