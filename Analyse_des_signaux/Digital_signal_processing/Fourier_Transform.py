@@ -1,8 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.interpolate import UnivariateSpline
 import csv
 import pandas as pd
+
+
 Chemin_acces="Manip\Manip_24_03_2023\Fente_0_2mm"
 
 # Lire le fichier ODS
@@ -31,18 +32,20 @@ def sauvegarder_donnees(nom_fichier, Liste,Liste_2, titre_1, titre_2 ): # nom_Fi
         for i in range(len(Liste)):
             writer.writerow([Liste[i], Liste_2[i]])
 
-# Création du spline
-longueur_lisse = np.linspace(400, 667.8739000000007, 1000)
-spline = UnivariateSpline(Longueur_donde, Absorbance, s=20)
 
-# Prédictions à partir du spline
-absorbance_lisse = spline(Longueur_donde)
-print(len(Longueur_donde))
-# Affichage des résultats
-plt.figure()
-plt.plot(Longueur_donde, Absorbance, '-', label='Données bruitées')
-plt.plot(Longueur_donde, absorbance_lisse, '--', label='Spline lissé')
-plt.legend()
-plt.xlabel('Longueur d\'onde')
-plt.ylabel('Absorbance')
+# Calculer la transformée de Fourier du signal
+fourier_transform = np.fft.fft(Absorbance,n=4096) # 4096 Pour plus de précision fft (zero padding) cf https://www.youtube.com/watch?v=LAswxBR513M&t=582s&ab_channel=VincentChoqueuse
+f=10*np.arange(4096)/4096  # 10: Fréquence d'échantillonage Phidget 
+nom_fichier=Chemin_acces+'\Transforme_de_fourier_Manip_24_03_2023_Fente_0_2mm.csv'
+titre_2='Transforme_de_fourier'
+titre='Frequence_(Hz)'
+fourier_transform=np.abs(fourier_transform) 
+Chemin_Latex= Chemin_acces + '\signal_Manip_24_03_2023_Fente_0_2mm.csv'
+plt.plot(f,fourier_transform, color='red')
 plt.show()
+
+plt.plot(Longueur_donde,Absorbance)
+plt.show()
+# Comparer les signaux original et filtré (par exemple, en les traçant)
+
+

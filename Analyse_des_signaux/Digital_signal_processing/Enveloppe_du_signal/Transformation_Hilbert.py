@@ -9,7 +9,7 @@ Chemin_acces="Manip\Manip_24_03_2023\Fente_0_2mm"
 
 # Lire le fichier ODS
 data_solution_blanc = pd.read_csv(Chemin_acces +'\solution_blanc.csv', encoding='ISO-8859-1')
-data_solution_echantillon= pd.read_csv(Chemin_acces +'\solution_echantillon1.csv', encoding='ISO-8859-1')
+data_solution_echantillon= pd.read_csv(Chemin_acces +'\solution_echantillon.csv', encoding='ISO-8859-1')
 #data_bruit_de_noir=pd.read_csv(Chemin_acces +'\Tension_de_noir_31_03_2023.csv', encoding='ISO-8859-1')
 
 
@@ -28,9 +28,9 @@ def correction_absorbance_negative(Tension_blanc, Tension_echantillon):
     return Tension_blanc,Tension_echantillon
 
 
-[Tension_blanc,Tension_echantillon]=correction_absorbance_negative(Tension_blanc,Tension_echantillon)
+Tension=correction_absorbance_negative(Tension_blanc,Tension_echantillon)
 
-Absorbance=np.log10(np.abs(Tension_blanc)/np.abs(Tension_echantillon))
+Absorbance=np.log10(np.abs(Tension[0])/np.abs(Tension[1]))
 
 
 def sauvegarder_donnees(nom_fichier, Liste, titre): # nom_Fichier: str / Liste_longueurs_d_onde, Liste_tensions: Liste / titre_1, titre_2: str
