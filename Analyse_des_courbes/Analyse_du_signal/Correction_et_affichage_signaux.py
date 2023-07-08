@@ -7,10 +7,8 @@ import os
 import datetime
 import matplotlib.animation as animation
 from matplotlib import style
-
 #CONSTANTE
 FE = 250000 # Fréquence d'échantillonage de la carte NI-PCI 6221
-REPERTOIRE_PAR_DEFAUT="C:\\Users\\vimarais\\Desktop\\Programmation_application_spectro-master\\Manip"
 """
 VARIABLES
 """
@@ -23,39 +21,10 @@ Largeur_fonction_porte = 35 # reglage opti (Fente 0_2mm): 23 / (Fente 0_5mm): 30
 """
 INITIALISATION DE LA MANIP
 """
-# Date du jour
-date_aujourdhui = datetime.date.today()
-Date = date_aujourdhui.strftime("%d_%m_%Y")
-print("La date d'aujourd'hui", Date)
 
-# Choix de la fente
-Taille_de_fente=input("Taille de fente : Fente_2nm, Fente_1nm , Fente_0_5nm, Fente_0_2nm : ")
-print("La fente utilisée :", Taille_de_fente)
-
-
-CHEMIN_GENERAL = os.path.join("C:\\Users\\vimarais\\Desktop\\Programmation_application_spectro-master\\Manip", Date, Taille_de_fente)
-
-if not os.path.exists(CHEMIN_GENERAL):
-    # Créer le répertoire en utilisant le chemin d'accès
-    os.makedirs(CHEMIN_GENERAL)
-    print("Répertoire créé avec succès :", CHEMIN_GENERAL)
-else:
-    print("Le répertoire existe déjà :", CHEMIN_GENERAL)
-
-
-def creaction_de_chemin(Grandeur_physique):
-    chemin = os.path.join(CHEMIN_GENERAL, Grandeur_physique)
-
-    if not os.path.exists(chemin):
-    # Créer le répertoire en utilisant le chemin d'accès
-        os.makedirs(chemin)
-        print("Répertoire créé avec succès :", chemin)
-    else:
-        print("Le répertoire existe déjà :", chemin)
-
-    return chemin
-
-
+CHEMIN="C:\\Users\\admin\\Documents\\Projet_GP\\Programmation_Spectro\\Programmation_application_spectro\\Manip\\Manip_2023\\Manip_06_2023\\30_06_2023\\Fente_2nm"
+Date="30_06_2023"
+Taille_de_fente = "Fente_2_nm"
 nom_espece_chimique=input("Qu'elle est votre échantillon étudié :")
 
 """
@@ -63,8 +32,8 @@ Lecture des fichier csv créé lors de l'acquisition
 """
 
 
-fichier_blanc=  CHEMIN_GENERAL + '\Tension_de_blanc_' + Date + "_" + Taille_de_fente + '.csv'
-fichier_echantillon=  CHEMIN_GENERAL + '\Tension_de_echantillon_' + Date + "_" + Taille_de_fente + '.csv'
+fichier_blanc=  CHEMIN + '\\'+ "Tension_de_blanc_30_06_2023_Fente_2nm.csv"
+fichier_echantillon=  CHEMIN + '\\' + "Tension_de_echantillon_30_06_2023_Fente_2nm.csv"
 
 
 data_solution_blanc = pd.read_csv(fichier_blanc, encoding='ISO-8859-1')
@@ -86,6 +55,17 @@ Tension_echantillon= data_solution_echantillon['Tension échantillon (Volt)']
 """
 Correction préliminaire du signal
 """
+def creaction_de_chemin(Grandeur_physique):
+    chemin = os.path.join(CHEMIN, Grandeur_physique)
+
+    if not os.path.exists(chemin):
+    # Créer le répertoire en utilisant le chemin d'accès
+        os.makedirs(chemin)
+        print("Répertoire créé avec succès :", chemin)
+    else:
+        print("Le répertoire existe déjà :", chemin)
+
+    return chemin
 
 
 # Supprimmer le bruit de noir
@@ -203,23 +183,7 @@ def Affichage_Transformee_de_Fourier(Titre, Tension):
     plt.savefig(chemin + "\\" + Titre+".pdf")
     plt.show()
 
-def Affichage_Absorbance(Titre, Absorbance):
-    Pic_d_absorbance=np.max(Absorbance)
-    Pic_longueur_donde=Longueur_donde[np.argmax((Absorbance))]
-    # Création du graphique
-    plt.plot(Longueur_donde, Absorbance)
-    plt.xlabel('Longueur d\'onde (nm)')
-    plt.ylabel('Absorbance')
-    plt.title('Absorbance du '+ nom_espece_chimique)
-    # Mise en évidence du point de pic en rouge
-    Affichage_des_max_Absorbance(Pic_longueur_donde, Pic_d_absorbance, Absorbance)
-    # Affichage du graphique
-    chemin = creaction_de_chemin('Absorbance')
-    plt.savefig(chemin +'\\'+ Titre+".pdf")
-    plt.show()
-
-
-def Affichage_pic_d_Absorbance(Titre, Absorbance):   
+def Sauvegarder_pics(Titre, Absorbance):   
     peaks, _ = find_peaks(Absorbance, distance=Fenetre_recherche_pic) # La fonction find_peaks de scipy.signal permet de trouver les maxima locaux dans un signal en comparant les valeurs voisines
     chemin= creaction_de_chemin('Absorbance')
 
@@ -237,48 +201,29 @@ def Affichage_pic_d_Absorbance(Titre, Absorbance):
     max_index = s.idxmax()
 
 
-    fichier_peaks=  chemin + '\pic_d_absorbance' + Date + "_" + Taille_de_fente + '.csv'
+    fichier_peaks=  chemin + '\pic_'+Titre + "_" + Date + "_" + Taille_de_fente + '.csv'
 
     df = pd.DataFrame({'Longueur_d_onde_(nm)': Longueur_donde[peaks], 'Absorbance': Absorbance[peaks]})
     df.to_csv(fichier_peaks , index=False)
 
-    longueur_donde_absorbe = Longueur_donde[max_index]
 
-    plt.plot(Longueur_donde, Absorbance, label='Données lissé')
-    plt.plot(Longueur_donde[peaks], Absorbance[peaks], 'ro')
+def Affichage_Absorbance(Titre, Absorbance):
+    Pic_d_absorbance=np.max(Absorbance)
+    Pic_longueur_donde=Longueur_donde[np.argmax((Absorbance))]
+    # Création du graphique
+    plt.plot(Longueur_donde, Absorbance)
     plt.xlabel('Longueur d\'onde (nm)')
-    plt.ylabel('Absorbance (lissée)')
-    plt.title(Titre)
-
-    # Affichage des coordonnées de tout les pics
-    for i in peaks:
-        plt.annotate('({:.2f} nm, {:.2f})'.format(Longueur_donde[i], Absorbance[i]),
-                    xy=(Longueur_donde[i], Absorbance[i]),
-                    xytext=(Longueur_donde[i] + 10, Absorbance[i]),
-                    fontsize=10,
-                    color='red',
-                    arrowprops=dict(facecolor='red', arrowstyle='->'))
-
-
-
-    # Affichage du maximum d'absorbance 
-    plt.annotate('({:.2f} nm, {:.2f})'.format(longueur_donde_absorbe, Max_absorbance),
-                xy=(longueur_donde_absorbe , Max_absorbance),
-                xytext=(longueur_donde_absorbe + 10 , Max_absorbance),
-                fontsize=10,
-                color='red',
-                arrowprops=dict(facecolor='red', arrowstyle='->'))
-
-
-    # Ligne pointillée reliant le point de pic à l'axe des x
-    plt.hlines(y=Max_absorbance, xmin=Longueur_donde[0] , xmax=longueur_donde_absorbe, linestyle='dashed', color='red')
-
-    # Ligne pointillée reliant le point de pic à l'axe des y
-    plt.vlines(x=longueur_donde_absorbe, ymin=min(Absorbance), ymax=Max_absorbance, linestyle='dashed', color='red')
-    plt.savefig(chemin + "\\" + Titre+".pdf")
-
+    plt.ylabel('Absorbance')
+    plt.title('Absorbance du '+ nom_espece_chimique)
+    # Mise en évidence du point de pic en rouge
+    Affichage_des_max_Absorbance(Pic_longueur_donde, Pic_d_absorbance, Absorbance)
     # Affichage du graphique
+    chemin = creaction_de_chemin('Absorbance')
+    Sauvegarder_pics(Titre, Absorbance)
+    plt.savefig(chemin +'\\'+ Titre+".pdf")
     plt.show()
+
+
 
 
 """
@@ -354,18 +299,12 @@ def Generate_Affichage():
     Absorbance_convol=np.log10(np.abs(Tension_blanc_convolu)/np.abs(Tension_echantillon_convolu))
     Affichage_Absorbance(Titre, Absorbance_convol)
 
-    Titre="Absorbance_convolue_pics_" + nom_espece_chimique 
-    Affichage_pic_d_Absorbance(Titre, Absorbance_convol)
-
-
     Titre="Absorbance_lisse_spline_" + nom_espece_chimique 
     spline = UnivariateSpline(Longueur_donde, Absorbance_convol, s=0.05)
     Absorbance_lisse = spline(Longueur_donde)
     Affichage_Absorbance(Titre, Absorbance_lisse)
 
 
-    Titre="Absorbance_lisse_spline_pics_" + nom_espece_chimique 
-    Affichage_pic_d_Absorbance(Titre, Absorbance_lisse)
 
 
-
+Generate_Affichage()

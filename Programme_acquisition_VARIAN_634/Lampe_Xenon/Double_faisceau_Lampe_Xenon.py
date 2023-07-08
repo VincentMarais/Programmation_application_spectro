@@ -7,8 +7,8 @@ from matplotlib import style
 import numpy as np
 from pyfirmata import Arduino, util
 from Utilitaires.Creation_repertoire import Repertoire_Date_Fente 
-from Commande_moteur.Fonction_code_moteur import etat_mot, param_mot, deplacer_vis, retour_moteur_vis, deplacer_moteur_miroir
-from Commande_moteur.Fonction_fourche_optique import fourche_optique_etat
+from Fonctions_commande_moteur.Fonction_code_moteur import etat_mot, param_mot, deplacer_vis, retour_moteur_vis, deplacer_moteur_miroir
+from Fonctions_commande_moteur.Fonction_fourche_optique import fourche_optique_etat
 from Carte_NI_PCI.Acquisition_Tension_NI_6621 import acquisition_tension
 from Utilitaires.Enregistrement_des_fichiers import sauvegarder_donnees
 from Utilitaires.Tracer_courbe import graph
