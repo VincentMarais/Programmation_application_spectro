@@ -201,8 +201,8 @@ vitesse_translation_vis=10 # 4mm/min
 
 
 
-fichier_blanc=  chemin + '\Tension_de_blanc_' + Date + "_" + Taille_de_fente + '.csv'
-fichier_echantillon=  chemin + '\Tension_de_echantillon_' + Date + "_" + Taille_de_fente + '.csv'
+fichier_blanc=  chemin + '\Tension_blanc_' + Date + "_" + Taille_de_fente + '.csv'
+fichier_echantillon=  chemin + '\Tension_echantillon_' + Date + "_" + Taille_de_fente + '.csv'
 
 
 Nom_echantillon='bleu de bromophenol' # A modifier si on change de composé chimique

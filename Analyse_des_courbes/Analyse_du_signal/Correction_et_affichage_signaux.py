@@ -32,8 +32,8 @@ Lecture des fichier csv créé lors de l'acquisition
 """
 
 
-fichier_blanc=  CHEMIN + '\\'+ "Tension_de_blanc_30_06_2023_Fente_2nm.csv"
-fichier_echantillon=  CHEMIN + '\\' + "Tension_de_echantillon_30_06_2023_Fente_2nm.csv"
+fichier_blanc=  CHEMIN + '\\'+ "Tension_blanc_30_06_2023_Fente_2nm.csv"
+fichier_echantillon=  CHEMIN + '\\' + "Tension_echantillon_30_06_2023_Fente_2nm.csv"
 
 
 data_solution_blanc = pd.read_csv(fichier_blanc, encoding='ISO-8859-1')
