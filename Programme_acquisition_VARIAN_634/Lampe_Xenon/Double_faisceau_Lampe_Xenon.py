@@ -199,13 +199,13 @@ course_vis=2 # 7mm
 nombre_de_mesures=10 # A modifier si on veut être plus précis
 vitesse_translation_vis=10 # 4mm/min
 
+Nom_echantillon=input("Nom de l'échantillon :") # A modifier si on change de composé chimique
 
 
 fichier_blanc=  chemin + '\Tension_blanc_' + Date + "_" + Taille_de_fente + '.csv'
 fichier_echantillon=  chemin + '\Tension_echantillon_' + Date + "_" + Taille_de_fente + '.csv'
 
 
-Nom_echantillon='bleu de bromophenol' # A modifier si on change de composé chimique
 Titre="Absorbance_"+ "_" + Nom_echantillon+ Date+"_"+ Taille_de_fente  
 
 ACQUISITION(course_vis, nombre_de_mesures, vitesse_translation_vis, Frequence_creneau, Rapport_cyclique, fichier_blanc, fichier_echantillon, Nom_echantillon, Titre, chemin) # course_vis 13.75 mm / 260 points / vitesse_translation_vis = 4mm/min
