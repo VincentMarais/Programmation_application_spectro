@@ -19,6 +19,8 @@ def Repertoire_annee_mois_jour():
             print("Le répertoire existe déjà :", chemin)
 
     return chemin
+
+
 def Repertoire_Date_Fente():
     Taille_de_fente=input("Taille de fente : Fente_2nm, Fente_1nm , Fente_0_5nm, Fente_0_2nm : ")
     date_aujourdhui = datetime.date.today()
